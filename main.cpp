@@ -50,7 +50,7 @@ int main(){
 		cout << endl << "Function not implemented. Terminated";
 		return 1;
 
-	} else if(userInputMainMenuMainMenu == 2){
+	} else if(userInputMainMenu == 2){
 		int customerSearchInputInt;
 
 		cout << endl << "[Lookup Customer] Enter an integer to select a search method:";
