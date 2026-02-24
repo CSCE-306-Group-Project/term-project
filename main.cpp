@@ -19,10 +19,10 @@ int main(){
 	cout << "\t(2) Lookup Customer\n";
 	cout << "\t(3) Exit Program\n";
 
-	int userInput;
-	cin >> userInput;
+	int userInputMainMenu;
+	cin >> userInputMainMenu;
 
-	if(userInput == 1){
+	if(userInputMainMenu == 1){
 		string fN;
 		string lN;
 		string a1;
@@ -50,7 +50,7 @@ int main(){
 		cout << endl << "Function not implemented. Terminated";
 		return 1;
 
-	} else if(userInput == 2){
+	} else if(userInputMainMenuMainMenu == 2){
 		int customerSearchInputInt;
 
 		cout << endl << "[Lookup Customer] Enter an integer to select a search method:";
@@ -60,19 +60,19 @@ int main(){
 		cin >> customerSearchInputInt;
 
 		if(customerSearchInputInt == 1){
-			string customerSearchNameUserInput;
+			string customerSearchNameuserInputMainMenu;
 
 			cout << endl << "[Lookup Customer] Enter last name to search:";
-			cin >> customerSearchNameUserInput;
+			cin >> customerSearchNameuserInputMainMenu;
 
 			cout << endl << "Function not implemented. Terminated";
 			return 1;
 
 		} else if(customerSearchInputInt == 2){
-			int customerSearchIDUserInput;
+			int customerSearchIDuserInputMainMenu;
 
 			cout << endl << "[Lookup Customer] Enter ID to search:";
-			cin >> customerSearchIDUserInput;
+			cin >> customerSearchIDuserInputMainMenu;
 
 			cout << endl << "Function not implemented. Terminated";
 			return 1;
@@ -81,7 +81,7 @@ int main(){
 			return 1;
 		}
 
-	} else if(userInput == 3){
+	} else if(userInputMainMenu == 3){
 		cout << endl << "Goodbye";
 		return 0;
 	} else{
