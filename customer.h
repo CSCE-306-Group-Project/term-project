@@ -48,7 +48,7 @@ public:
 		return lastName;
 	}
 	string getFullAddress(){
-		return address_1 + "\n" + address_2 + "\n" + address_3 + "\n" + postalCode;
+		return address_1 + "\n" + address_2 + "\n" + address_3;
 	}
 	string getAddress1(){
 		return address_1;
