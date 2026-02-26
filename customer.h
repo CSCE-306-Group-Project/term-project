@@ -8,7 +8,7 @@
 
 #ifndef CUSTOMER_H_
 #define CUSTOMER_H_
-
+#include <string>
 #include <cstring>
 #include <cmath>
 
@@ -47,6 +47,9 @@ public:
 	}
 	string getLastName(){
 		return lastName;
+	}
+	int getID(){
+		return id;
 	}
 	string getFullAddress(){
 		return address_1 + "\n" + address_2 + "\n" + address_3;

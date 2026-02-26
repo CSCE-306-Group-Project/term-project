@@ -1,10 +1,24 @@
-
 #include <iostream>
 #include "customer.h"
 #include <cstring>
 #include <cstdlib>
-
+#include <vector>
+#include <unordered_map>
 using namespace std;
+
+vector<Customer> customers;
+unordered_map<int, Customer*> idIndex;
+unordered_map<string, vector<Customer*>> lastNameIndex;
+
+void addCustomer(Customer c){
+
+    customers.push_back(c);
+
+    Customer* ptr = &customers.back();
+
+    idIndex[ptr->getID()] = ptr;
+    lastNameIndex[ptr->getLastName()].push_back(ptr);
+}
 
 int main(){
 	// create empty associated array, Cust
@@ -47,8 +61,12 @@ int main(){
 		cin >> phone;
 
 		// TODO
-		cout << endl << "Function not implemented. Terminated";
-		return 1;
+		Customer c(fN, lN, a1, a2, a3, postal, phone);
+
+		addCustomer(c);
+
+		cout << endl << "Customer added successfully.\n";
+		return 0;
 
 	} else if(userInputMainMenu == 2){
 		int customerSearchInputInt;
@@ -60,25 +78,51 @@ int main(){
 		cin >> customerSearchInputInt;
 
 		if(customerSearchInputInt == 1){
-			string customerSearchNameuserInputMainMenu;
 
-			cout << endl << "[Lookup Customer] Enter last name to search:";
-			cin >> customerSearchNameuserInputMainMenu;
+		    string searchName;
 
-			cout << endl << "Function not implemented. Terminated";
-			return 1;
+		    cout << endl << "[Lookup Customer] Enter last name to search:";
+		    cin >> searchName;
 
+		    if(lastNameIndex.count(searchName)){
+
+		        vector<Customer*> results = lastNameIndex[searchName];
+
+		        for(Customer* c : results){
+
+		            cout << "\nFound Customer:\n";
+		            cout << c->getFirstName() << " "
+		                 << c->getLastName() << endl;
+		            cout << c->getFullAddress() << endl;
+		            cout << "Phone: " << c->getPhone() << endl;
+		        }
+
+		    } else {
+		        cout << "\nNo customer found.\n";
+		    }
+
+		    return 0;
 		} else if(customerSearchInputInt == 2){
-			int customerSearchIDuserInputMainMenu;
+			int searchID;
 
-			cout << endl << "[Lookup Customer] Enter ID to search:";
-			cin >> customerSearchIDuserInputMainMenu;
+			    cout << endl << "[Lookup Customer] Enter ID to search:";
+			    cin >> searchID;
 
-			cout << endl << "Function not implemented. Terminated";
-			return 1;
-		} else{
-			cout << endl << "The input provided is not allowed. Terminating.";
-			return 1;
+			    if(idIndex.count(searchID)){
+
+			        Customer* c = idIndex[searchID];
+
+			        cout << "\nFound Customer:\n";
+			        cout << c->getFirstName() << " "
+			             << c->getLastName() << endl;
+			        cout << c->getFullAddress() << endl;
+			        cout << "Phone: " << c->getPhone() << endl;
+
+			    } else {
+			        cout << "\nNo customer found.\n";
+			    }
+
+			    return 0;
 		}
 
 	} else if(userInputMainMenu == 3){
