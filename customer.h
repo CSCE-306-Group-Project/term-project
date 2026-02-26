@@ -31,8 +31,7 @@ public:
 		phoneNumber = 0;
 	}
 
-	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone){
-		id = rand();
+	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone, int idin = 0){
 		firstName = fN;
 		lastName = lN;
 		address_1 = a1;
@@ -40,6 +39,12 @@ public:
 		address_3 = a3;
 		postalCode = postal;
 		phoneNumber = phone;
+
+		if(idin == 0){
+			id = rand();
+		} else{
+			id = idin;
+		}
 	}
 
 	string getFirstName(){
