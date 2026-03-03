@@ -57,7 +57,7 @@ public:
 		return id;
 	}
 	string getFullAddress(){
-		return address_1 + "\n" + address_2 + "\n" + address_3;
+		return address_1 + "\n" + address_2 + ", " + address_3 + "\nPhone:" + to_string(phoneNumber) + "\n";
 	}
 	string getAddress1(){
 		return address_1;

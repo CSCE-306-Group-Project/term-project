@@ -167,10 +167,10 @@ int main() {
 					for (Customer *c : results) {
 
 						cout << "\nFound Customer:\n";
+						cout << "ID: " << c->getID() << "\n";
 						cout << c->getFirstName() << " " << c->getLastName()
 								<< endl;
 						cout << c->getFullAddress() << endl;
-						cout << "Phone: " << c->getPhone() << endl;
 					}
 
 				} else {
