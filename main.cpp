@@ -8,6 +8,9 @@
 #include <fstream>
 #include <sstream>
 #include <deque>
+#include <chrono>
+#include <thread>
+
 using namespace std;
 
 deque<Customer> customers;
@@ -22,6 +25,18 @@ void addCustomer(Customer c) {
 
 	idIndex[ptr->getID()] = ptr;
 	lastNameIndex[ptr->getLastName()].push_back(ptr);
+}
+
+//Code for progress bar found on https://www.geeksforgeeks.org/cpp/sleep-function-in-cpp/
+void verifyAddressCASS(string a1, string a2, string a3, int pbar, int processDelay){
+	 cout << "Please wait a moment. Processing: [";
+	 for (int i = 0; i < pbar; i++) {
+	         // Print one character of progress
+	         cout << "#";
+	         cout.flush();
+	         this_thread::sleep_for(chrono::milliseconds(processDelay));
+	 }
+	 cout << "] \nAddress verified :)" << endl;
 }
 
 int main() {
@@ -133,6 +148,11 @@ int main() {
 			cin >> a3;
 			cout << "[Add Customer] (6/7) Customer Postal Code:" << endl;
 			cin >> postal;
+
+			cout << "Verifying address through Coding Accuracy Support System."<< endl;
+			verifyAddressCASS(a1, a2, a3, 20, 100);
+			//To simulate sending the address data out to an external database that checks addresses.
+
 			cout << "[Add Customer] (7/7) Customer Phone Number:" << endl;
 			cin >> phone;
 
