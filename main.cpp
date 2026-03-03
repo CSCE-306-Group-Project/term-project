@@ -164,18 +164,52 @@ int main() {
 
 					vector<Customer*> results = lastNameIndex[searchName];
 
-					for (Customer *c : results) {
+					if(results.size() == 1){
 
-						cout << "\nFound Customer:\n";
-						cout << "ID: " << c->getID() << "\n";
-						cout << c->getFirstName() << " " << c->getLastName()
-								<< endl;
-						cout << c->getFullAddress() << endl;
-					}
+		            //if we only have one then just show it
+		            Customer* c = results[0];
 
-				} else {
-					cout << "\nNo customer found.\n";
-				}
+		            cout << "\nFound Customer:\n";
+		            cout << c->getFirstName() << " "
+		                 << c->getLastName() << endl;
+		            cout << c->getFullAddress() << endl;
+		            cout << "Phone: " << c->getPhone() << endl;
+
+		        } else {
+
+		            // when we have multiple last name we can let user to select
+		            cout << "\nMultiple customers found:\n";
+
+		            for (size_t i = 0; i < results.size(); ++i) {
+		                cout << "(" << i + 1 << ") "
+		                     << results[i]->getFirstName() << " "
+		                     << results[i]->getLastName()
+		                     << " (ID: " << results[i]->getID() << ")"
+		                     << endl;
+		            }
+
+		            cout << "\nSelect a customer by number: ";
+		            int choice;
+		            cin >> choice;
+
+		            if (choice > 0 && static_cast<size_t>(choice) <= results.size()) {
+
+		                Customer* selected = results[static_cast<size_t>(choice) - 1];
+
+		                cout << "\nSelected Customer:\n";
+		                cout << selected->getFirstName() << " "
+		                     << selected->getLastName() << endl;
+		                cout << selected->getFullAddress() << endl;
+		                cout << "Phone: " << selected->getPhone() << endl;
+
+		            } else {
+		                cout << "\nInvalid selection.\n";
+		            }
+		        }
+
+		    } else {
+		        cout << "\nNo customer found.\n";
+		    }
 
 			} else if (customerSearchInputInt == 2) {
 				int searchID;
