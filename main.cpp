@@ -140,11 +140,11 @@ int main() {
 			cin >> fN;
 			cout << "[Add Customer] (2/7) Customer Last Name:" << endl;
 			cin >> lN;
-			cout << "[Add Customer] (3/7) Customer Address Line 1:" << endl;
+			cout << "[Add Customer] (3/7) Customer Address Line 1 (Street):" << endl;
 			cin >> a1;
-			cout << "[Add Customer] (4/7) Customer Address Line 2:" << endl;
+			cout << "[Add Customer] (4/7) Customer Address Line 2 (City/Locality):" << endl;
 			cin >> a2;
-			cout << "[Add Customer] (5/7) Customer Address Line 3:" << endl;
+			cout << "[Add Customer] (5/7) Customer Address Line 3 (State/Providence):" << endl;
 			cin >> a3;
 			cout << "[Add Customer] (6/7) Customer Postal Code:" << endl;
 			cin >> postal;
