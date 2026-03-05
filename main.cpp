@@ -38,7 +38,91 @@ void verifyAddressCASS(string a1, string a2, string a3, int pbar, int processDel
 	 }
 	 cout << "] \nAddress verified :)" << endl;
 }
+} else if (userInputMainMenu == 3) {
 
+    // Phase 2 Part 3: Rainbow Tribble
+    deque<int> rainbowQueue;
+    loadRainbowList("rainbowList.txt", rainbowQueue);
+
+    cout << "\n[Rainbow Tribble]\n";
+    cout << "\t(1) Add person to waiting list\n";
+    cout << "\t(2) Sell rainbow tribble to next person\n";
+    cout << "\t(3) Back\n";
+    cout << "Choice: ";
+
+    int choice;
+    cin >> choice;
+
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << "Invalid input.\n";
+        continue;
+    }
+
+    if (choice == 1) {
+        int cid;
+        cout << "Enter customer ID: ";
+        cin >> cid;
+
+        if (!idIndex.count(cid)) {
+            cout << "Customer ID not found.\n";
+        } else {
+            // check duplicates (limit 1)
+            bool exists = false;
+            for (int x : rainbowQueue) {
+                if (x == cid) { exists = true; break; }
+            }
+
+            if (exists) {
+                cout << "Customer already on waiting list.\n";
+            } else {
+                rainbowQueue.push_back(cid);
+                saveRainbowList("rainbowList.txt", rainbowQueue);
+                cout << "Added to waiting list: " << sixDigits(cid) << "\n";
+            }
+        }
+
+    } else if (choice == 2) {
+
+        if (rainbowQueue.empty()) {
+            cout << "Waiting list is empty.\n";
+        } else {
+            int cid = rainbowQueue.front();
+
+            if (!idIndex.count(cid)) {
+                cout << "Customer not found. Removing from list.\n";
+                rainbowQueue.pop_front();
+                saveRainbowList("rainbowList.txt", rainbowQueue);
+            } else {
+                Customer* c = idIndex[cid];
+
+                int quantity = 1;                 // rainbow limit 1
+                double paid = priceForQuantity(1);// uses same price list
+
+                int newOrderId = getMaxOrderId("orders.txt") + 1;
+
+                // create order + transaction
+                writeOrder("orders.txt", newOrderId, quantity, paid);
+                writeTransaction("transactions.txt", cid, newOrderId);
+
+                // remove customer from waiting list
+                rainbowQueue.pop_front();
+                saveRainbowList("rainbowList.txt", rainbowQueue);
+
+                // confirmation
+                cout << "\nRainbow sale confirmed:\n";
+                cout << c->getFirstName() << " " << c->getLastName() << "\n";
+                cout << "Customer ID: " << sixDigits(cid) << "\n";
+                cout << "Quantity: " << quantity << "\n";
+                cout << "Price: $" << fixed << setprecision(2) << paid << "\n";
+                cout << "Order ID: " << sixDigits(newOrderId) << "\n";
+            }
+        }
+
+    } else {
+        // back or invalid
+    }
 int main() {
 	// create empty associated array, Cust
 
