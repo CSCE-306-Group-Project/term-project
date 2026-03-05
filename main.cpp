@@ -11,6 +11,8 @@
 #include <chrono>
 #include <thread>
 
+#include "shop.h"
+
 using namespace std;
 
 deque<Customer> customers;
@@ -41,7 +43,7 @@ void verifyAddressCASS(string a1, string a2, string a3, int pbar, int processDel
 
 int main() {
 	// create empty associated array, Cust
-
+	Shop shop;
 	// pull from customers.txt
 	// split by line
 	// move each line into a new Customer object saved within Cust
@@ -122,7 +124,9 @@ int main() {
 		cout << "\tEnter an integer to select a menu option." << endl;
 		cout << "\t(1) Add Customer\n";
 		cout << "\t(2) Lookup Customer\n";
-		cout << "\t(3) Exit Program\n";
+		cout << "\t(3) Buy Tribble\n";
+		cout << "\t(4) Get placed on the waiting list for the elusive Rainbow Tribble\n";
+		cout << "\t(5) Exit Program\n";
 
 		userInputMainMenu = 0;
 		cin >> userInputMainMenu;
@@ -170,6 +174,7 @@ int main() {
 					<< "[Lookup Customer] Enter an integer to select a search method:";
 			cout << endl << "\t(1) Search By Last Name";
 			cout << endl << "\t(2) Search By ID\n";
+			cout << endl << "\t(3) Search by Order #\n";
 
 			cin >> customerSearchInputInt;
 
@@ -251,9 +256,70 @@ int main() {
 					cout << "\nNo customer found.\n";
 				}
 
+			} else if (customerSearchInputInt == 3) {
+			    int searchOrderID;
+			    cout << endl << "[Lookup Customer] Enter Order #: ";
+			    cin >> searchOrderID;
+
+			    // Ask Shop to find the order — returns nullptr if it doesn't exist
+			    Order* foundOrder = shop.getOrderByID(searchOrderID);
+
+			    if (foundOrder == nullptr) {
+			        cout << "\nNo order found with that ID.\n";
+			    } else {
+			        // Now find the customer who placed this order
+			        int custID = shop.getCustomerIDByOrderID(searchOrderID);
+			        Customer* c = idIndex[custID];
+
+			        cout << "\nOrder Found:\n";
+			        cout << foundOrder->to_string() << "\n";
+			        cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
+			        cout << c->getFullAddress() << "\n";
+			        cout << "Phone: " << c->getPhone() << "\n";
+			    }
 			}
 
 		} else if (userInputMainMenu == 3) {
+			//This one leads to the tribble buying menu
+			int custID, qty;
+
+			    cout << "\nEnter Customer ID: ";
+			    cin >> custID;
+
+			    // Verify the customer actually exists before proceeding
+			    if (!idIndex.count(custID)) {
+			        cout << "\nNo customer found with that ID.\n";
+			    } else {
+			        Customer* c = idIndex[custID];
+			        cout << "\nWelcome to the Tribble Store, " << c->getFirstName() << "!\n";
+			        cout << "Enter the number of Tribbles you wish to purchase:\n";
+			        cout << "\t(1) $9.50\n";
+			        cout << "\t(2) $16.15\n";
+			        cout << "\t(3) $25.88\n";
+			        cout << "\t(4) $28.15\n";
+			        cout << "\t(5) $30.00\n";
+			        cout << "\t(6) Exit store\n";
+			        cin >> qty;
+
+			        if (qty >= 1 && qty <= 5) {
+			            Order* o = shop.processSale(custID, qty);
+			            cout << "\n--- Receipt ---\n";
+			            cout << "Customer: " << c->getFirstName() << " " << c->getLastName() << "\n";
+			            cout << "You have purchased " << o->getQuantity() << " Tribble(s) for $"
+			                 << fixed << setprecision(2) << o->getPrice() << "\n";
+			            cout << "Order ID: " << o->getOrderID() << "\n";
+			            cout << "---------------\n";
+			        } else if (qty == 6) {
+			            cout << "\nReturning to main menu.\n";
+			        } else {
+			            cout << "\nInvalid selection.\n";
+			        }
+			    }
+			} else if (userInputMainMenu == 4) {
+			//This one leads to the elusive rainbow tribble waiting list
+			doMenu = false;
+		} else if (userInputMainMenu == 5) {
+			//This one stops the function
 			doMenu = false;
 		} else {
 			cout << endl << "The input provided is not allowed.";
