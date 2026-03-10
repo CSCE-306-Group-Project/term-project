@@ -141,15 +141,15 @@ int main() {
 			int phone;
 
 			cout << endl << "[Add Customer] (1/7) Customer First Name:" << endl;
-			cin >> fN;
+			getline(cin, fN);
 			cout << "[Add Customer] (2/7) Customer Last Name:" << endl;
-			cin >> lN;
+			getline(cin, lN);
 			cout << "[Add Customer] (3/7) Customer Address Line 1 (Street):" << endl;
-			cin >> a1;
+			getline(cin, a1);
 			cout << "[Add Customer] (4/7) Customer Address Line 2 (City/Locality):" << endl;
-			cin >> a2;
+			getline(cin, a2);
 			cout << "[Add Customer] (5/7) Customer Address Line 3 (State/Providence):" << endl;
-			cin >> a3;
+			getline(cin, a3);
 			cout << "[Add Customer] (6/7) Customer Postal Code:" << endl;
 			cin >> postal;
 
@@ -183,7 +183,7 @@ int main() {
 				string searchName;
 
 				cout << endl << "[Lookup Customer] Enter last name to search:";
-				cin >> searchName;
+				getline(cin, searchName);
 
 				if (lastNameIndex.count(searchName)) {
 
