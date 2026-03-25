@@ -26,16 +26,22 @@ private:
     // Transactions keyed by order ID
     unordered_map<int, Transaction*> transactions;
 
+    deque<int> rainbowQueue;
     // we want each order to retrieve a unique ID, so basing it off real stores, we decided
     //to increment it by one in this class only so no other code could mess with it.
     int nextOrderID;
+
+    //This will allow us to give new customers ID
+    int nextCustomerID;
 
     // Here are the prices for the Tribbles, listed in an array.
     const double prices[6] = {0.0, 9.50, 16.15, 25.88, 28.15, 30.00};
 
 public:
     // Constructor — nextOrderID starts at 1, ready for the first sale. Yippee
-    Shop() : nextOrderID(1) {}
+
+    // Constructor – used in making new IDs for inputed customers
+    Shop() : nextOrderID(1), nextCustomerID(1) {}
 
     // Destructor
     //using pointers uses memory, so to save up on some space we delete them when cleaning up
@@ -98,13 +104,79 @@ public:
 
     // Looks up the transaction keyed on order ID to find which customer
     // placed that order. Returns -1 if no matching transaction is found,
-    // which main() can use as asignal that the order ID is invalid.
+    // which main() can use as a signal that the order ID is invalid.
     int getCustomerIDByOrderID(int orderID) {
         if (transactions.count(orderID)) {
             return transactions[orderID]->getCustomerID();
         }
         return -1;
     }
+    //Section 2 part 3 rainbow tribble goes here
+    void loadRainbowList(const string& filename) {
+        ifstream inFile(filename);
+        if (!inFile.is_open()) return; // no file yet, the queue remains empty
+        int id;
+        while (inFile >> id) {
+            rainbowQueue.push_back(id);
+        }
+        inFile.close();
+    }
+
+    void saveRainbowList(const string& filename) {
+        ofstream outFile(filename);
+        if (!outFile.is_open()) {
+            cout << "Warning: Could not write to " << filename << "\n";
+            return;
+        }
+        for (int id : rainbowQueue) {
+            outFile << id << "\n";
+        }
+        outFile.close();
+    }
+
+    // Adds a customer ID to the end of the queue, with duplicate check
+    // Returns false if the customer is already on the list
+    bool addToRainbowList(int customerID) {
+        for (int id : rainbowQueue) {
+            if (id == customerID) return false;
+        }
+        rainbowQueue.push_back(customerID);
+        return true;
+    }
+
+    // Returns the customer ID at the front of the queue without removing them,
+    // so main() can look up and display the customer before committing to the sale
+    // Returns -1 if the queue is empty
+    int peekRainbowFront() {
+        if (rainbowQueue.empty()) return -1;
+        return rainbowQueue.front();
+    }
+
+    // Pops the front of the queue after a confirmed sale
+    void popRainbowFront() {
+        if (!rainbowQueue.empty()) rainbowQueue.pop_front();
+    }
+
+    bool isRainbowListEmpty() {
+        return rainbowQueue.empty();
+    }
+
+    // Call this after all customers are loaded from file, passing in
+    // the idIndex so Shop can find the current highest ID
+    void initCustomerID(const unordered_map<int, Customer*>& idIndex) {
+        int maxID = 0;
+        for (const auto& pair : idIndex) {
+            if (pair.first > maxID) maxID = pair.first;
+        }
+        nextCustomerID = maxID + 1;
+    }
+
+    // Returns the next available customer ID and advances the counter
+    int getNextCustomerID() {
+        return nextCustomerID++;
+    }
+
+
 };
 
 

@@ -19,6 +19,7 @@ deque<Customer> customers;
 unordered_map<int, Customer*> idIndex;
 unordered_map<string, vector<Customer*>> lastNameIndex;
 
+
 void addCustomer(Customer c) {
 
 	customers.push_back(c);
@@ -57,7 +58,7 @@ int main() {
 	}
 
 	string customerdata;
-
+	shop.loadRainbowList("rainbowList.txt");
 	// loop through each line in the input file
 	while (getline(inputFile, customerdata)) {
 
@@ -110,6 +111,9 @@ int main() {
 
 	inputFile.close();
 
+	shop.initCustomerID(idIndex);
+
+
 	bool doMenu = true;
 	int userInputMainMenu = 0;
 	cout << "Welcome! ";
@@ -130,7 +134,8 @@ int main() {
 
 		userInputMainMenu = 0;
 		cin >> userInputMainMenu;
-
+		//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		if (userInputMainMenu == 1) {
 			string fN;
 			string lN;
@@ -161,11 +166,12 @@ int main() {
 			cin >> phone;
 
 			// TODO
-			Customer c(fN, lN, a1, a2, a3, postal, phone);
 
+			int newID = shop.getNextCustomerID();
+			Customer c(fN, lN, a1, a2, a3, postal, phone, newID);
 			addCustomer(c);
+			cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
 
-			cout << endl << "Customer added successfully.\n";
 
 		} else if (userInputMainMenu == 2) {
 			int customerSearchInputInt = 0;
@@ -177,7 +183,8 @@ int main() {
 			cout << endl << "\t(3) Search by Order #\n";
 
 			cin >> customerSearchInputInt;
-
+			//this next line also helps solve an issue with menu directory. Apparently it is called an input buffer problem
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			if (customerSearchInputInt == 1) {
 
 				string searchName;
@@ -199,6 +206,7 @@ int main() {
 		                 << c->getLastName() << endl;
 		            cout << c->getFullAddress() << endl;
 		            cout << "Phone: " << c->getPhone() << endl;
+		            cout << "Customer ID: " << c->getID() << "\n";
 
 		        } else {
 
@@ -226,6 +234,7 @@ int main() {
 		                     << selected->getLastName() << endl;
 		                cout << selected->getFullAddress() << endl;
 		                cout << "Phone: " << selected->getPhone() << endl;
+		                cout << "Customer ID: " << selected->getID() << "\n";
 
 		            } else {
 		                cout << "\nInvalid selection.\n";
@@ -251,6 +260,7 @@ int main() {
 							<< endl;
 					cout << c->getFullAddress() << endl;
 					cout << "Phone: " << c->getPhone() << endl;
+					cout << "Customer ID: " << c->getID() << "\n";
 
 				} else {
 					cout << "\nNo customer found.\n";
@@ -315,9 +325,55 @@ int main() {
 			            cout << "\nInvalid selection.\n";
 			        }
 			    }
-			} else if (userInputMainMenu == 4) {
-			//This one leads to the elusive rainbow tribble waiting list
-			doMenu = false;
+		} else if (userInputMainMenu == 4) {
+		    cout << "\n[Rainbow Tribble]\n";
+		    cout << "\t(1) Add person to waiting list\n";
+		    cout << "\t(2) Sell rainbow tribble to next person on list\n";
+		    cout << "\t(3) Back\n";
+		    cout << "Choice: ";
+
+		    int rbChoice;
+		    cin >> rbChoice;
+		    //this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
+		    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		    if (rbChoice == 1) {
+		        int cid;
+		        cout << "Enter customer ID: ";
+		        cin >> cid;
+
+		        if (!idIndex.count(cid)) {
+		            cout << "Customer ID not found.\n";
+		        } else if (!shop.addToRainbowList(cid)) {
+		            cout << "Customer is already on the waiting list.\n";
+		        } else {
+		            Customer* c = idIndex[cid];
+		            cout << c->getFirstName() << " " << c->getLastName()
+		                 << " added to the rainbow tribble waiting list.\n";
+		        }
+
+		    } else if (rbChoice == 2) {
+		        int cid = shop.peekRainbowFront();
+
+		        if (cid == -1) {
+		            cout << "The waiting list is empty.\n";
+		        } else {
+		            Customer* c = idIndex[cid];
+		            Order* o = shop.processSale(cid, 1); // rainbow tribble, qty 1
+		            shop.popRainbowFront();
+
+		            cout << "\n--- Rainbow Tribble Sale Confirmed ---\n";
+		            cout << "Customer: " << c->getFirstName() << " " << c->getLastName() << "\n";
+		            cout << "You have purchased 1 Rainbow Tribble for $"
+		                 << fixed << setprecision(2) << o->getPrice() << "\n";
+		            cout << "Order ID: " << o->getOrderID() << "\n";
+		            cout << "--------------------------------------\n";
+		        }
+
+		    } else if (rbChoice == 3) {
+		        cout << "Returning to main menu.\n";
+		    } else {
+		        cout << "Invalid selection.\n";
+		    }
 		} else if (userInputMainMenu == 5) {
 			//This one stops the function
 			doMenu = false;
@@ -328,6 +384,7 @@ int main() {
 	}
 
 	cout << endl << "Goodbye";
+	shop.saveRainbowList("rainbowList.txt");
 	return 0;
 
 }
