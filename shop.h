@@ -13,6 +13,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <ctime>
 #include "order.h"
 #include "transaction.h"
 
@@ -57,21 +58,38 @@ public:
         // Look up the correct price using our array a little up on this page
         double total = prices[quantity];
 
-        Order* newOrder = new Order(nextOrderID, quantity, total);
-        orders[nextOrderID] = newOrder;
+        time_t ts = time(nullptr);
+        long orderID = ts % 1000000;
 
-        Transaction* newTransaction = new Transaction(customerID, nextOrderID);
-        transactions[nextOrderID] = newTransaction;
+        Order* newOrder = new Order(orderID, quantity, total);
+        orders[orderID] = newOrder;
+
+        Transaction* newTransaction = new Transaction(customerID, orderID);
+        transactions[orderID] = newTransaction;
 
         // This is where we write and don't read to a file. This will keep track of orders
         ofstream outFile("transactions.txt", std::ios::app);
         if (outFile.is_open()) {
-            outFile << "CustomerID: " << customerID
-                    << " | " << newOrder->to_string() << "\n";
+            outFile << customerID << ";" << newOrder->getOrderID() << endl;
             outFile.close();
         } else {
             cout << "Warning: Could not write to transactions.txt\n";
         }
+
+        ofstream outFile_orders("orders.txt", std::ios::app);
+        if (outFile_orders.is_open()) {
+
+        	time_t t = time(nullptr);
+        	tm* now = localtime(&t);
+        	char currentTime[11];
+        	strftime(currentTime, sizeof(currentTime), "%d-%b-%y", now);
+
+        	outFile_orders << newOrder->getOrderID() << ";" << currentTime << ";" << newOrder->getQuantity() << ";" << newOrder->getPrice() << endl;
+
+        	outFile_orders.close();
+       } else {
+           cout << "Warning: Could not write to orders.txt\n";
+       }
 
         // Advance the counter so the next order gets a unique ID by adding one
         nextOrderID++;
