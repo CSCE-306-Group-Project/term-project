@@ -12,6 +12,7 @@
 #include <thread>
 
 #include "shop.h"
+#include "salesStaff.h"
 
 using namespace std;
 
