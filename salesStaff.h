@@ -29,9 +29,11 @@ public:
 
 
 class salesPerson : public salesTeam{
+private:
+	string supervisorName;
 public:
-
-	salesPerson(){
+	salesPerson(string superName){
+		supervisorName = superName;
 		commissionRate = 0.05;
 	}
 
@@ -42,8 +44,11 @@ public:
 
 
 class superSalesPerson : public salesTeam{
+private:
+	string supervisorName;
 public:
-	superSalesPerson(){
+	superSalesPerson(string superName){
+		supervisorName = superName;
 		commissionRate = 0.065;
 	}
 
@@ -54,8 +59,11 @@ public:
 
 
 class supervisor : public salesTeam{
+private:
+	string managerName;
 public:
-	supervisor(){
+	supervisor(string mgmtName){
+		managerName = mgmtName;
 		commissionRate = 0.065;
 	}
 
