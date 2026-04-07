@@ -114,6 +114,71 @@ int main() {
 
 	shop.initCustomerID(idIndex);
 
+	// Read salesStaff.txt — build staff vector and ID lookup map
+	vector<salesTeam*> staff;
+	unordered_map<int, salesTeam*> staffByID;
+
+	ifstream staffFile("salesStaff.txt");
+	string staffLine;
+	while (getline(staffFile, staffLine)) {
+	    stringstream ss2(staffLine);
+	    string title, sName, spIDstr, bossIDstr;
+	    getline(ss2, title, ';');
+	    getline(ss2, sName, ';');
+	    getline(ss2, spIDstr, ';');
+	    getline(ss2, bossIDstr, ';');
+
+	    int spID   = stoi(spIDstr);
+	    int bossID = stoi(bossIDstr);
+
+	    salesTeam* p = nullptr;
+	    if      (title == "Sales")       p = new salesPerson(sName, spID, bossID);
+	    else if (title == "SuperSales")  p = new superSalesPerson(sName, spID, bossID);
+	    else if (title == "Supervisor")  p = new supervisor(sName, spID, bossID);
+	    else if (title == "Manager")     p = new manager(sName, spID);
+
+	    if (p) {
+	        staff.push_back(p);
+	        staffByID[spID] = p;
+	    }
+	}
+	staffFile.close();
+
+	// Read orders.txt — build orderID -> price lookup
+	unordered_map<int, double> orderPrices;
+	ifstream ordersFile("orders.txt");
+	string ordLine;
+	while (getline(ordersFile, ordLine)) {
+	    stringstream ss3(ordLine);
+	    string idStr, date, qtyStr, priceStr;
+	    getline(ss3, idStr,    ';');
+	    getline(ss3, date,     ';');
+	    getline(ss3, qtyStr,   ';');
+	    getline(ss3, priceStr, ';');
+	    orderPrices[stoi(idStr)] = stod(priceStr);
+	}
+	ordersFile.close();
+
+	// Read transactions.txt — accumulate each sale onto the right salesperson
+	ifstream transFile("transactions.txt");
+	string transLine;
+	while (getline(transFile, transLine)) {
+	    stringstream ss4(transLine);
+	    string custIDstr, spIDstr, orderIDstr;
+	    getline(ss4, custIDstr,  ';');
+	    getline(ss4, spIDstr,    ';');
+	    getline(ss4, orderIDstr, ';');
+
+	    int spID    = stoi(spIDstr);
+	    int orderID = stoi(orderIDstr);
+
+	    if (spID == 0) continue; // in-store purchase, no salesperson
+	    if (staffByID.count(spID) && orderPrices.count(orderID)) {
+	        staffByID[spID]->addSale(orderPrices[orderID]);
+	    }
+	}
+	transFile.close();
+
 
 	bool doMenu = true;
 	int userInputMainMenu = 0;
@@ -132,6 +197,7 @@ int main() {
 		cout << "\t(3) Buy Tribble\n";
 		cout << "\t(4) Get placed on the waiting list for the elusive Rainbow Tribble\n";
 		cout << "\t(5) Exit Program\n";
+		cout << "\t(6) View Sales Report\n";
 
 		userInputMainMenu = 0;
 		cin >> userInputMainMenu;
@@ -375,6 +441,35 @@ int main() {
 		    } else {
 		        cout << "Invalid selection.\n";
 		    }
+		} else if (userInputMainMenu == 6) {
+		    cout << "\n--- Sales Commission Report ---\n";
+		    cout << left  << setw(25) << "Name"
+		         << right << setw(12) << "Gross Sales"
+		         << setw(12) << "Commission" << "\n";
+		    cout << string(50, '-') << "\n";
+
+		    for (salesTeam* p : staff) {
+		        // Sum up all sales from everyone below this person in the hierarchy
+		        double subSales = 0.0;
+		        int myID = p->getSalesPersonID();
+		        for (salesTeam* other : staff) {
+		            if (other->getBossID() == myID) {
+		                subSales += other->getGrossSales();
+
+		                int subID = other->getSalesPersonID();
+		                for (salesTeam* sub2 : staff) {
+		                    if (sub2->getBossID() == subID) {
+		                        subSales += sub2->getGrossSales();
+		                    }
+		                }
+		            }
+		        }
+		        cout << left  << setw(23) << p->getName()
+		             << right << setw(11) << fixed << setprecision(2) << p->getGrossSales()
+		             << setw(12) << p->getCommission(subSales) << "\n";
+		    }
+		    cout << string(50, '-') << "\n";
+
 		} else if (userInputMainMenu == 5) {
 			//This one stops the function
 			doMenu = false;
