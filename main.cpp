@@ -196,8 +196,8 @@ int main() {
 		cout << "\t(2) Lookup Customer\n";
 		cout << "\t(3) Buy Tribble\n";
 		cout << "\t(4) Get placed on the waiting list for the elusive Rainbow Tribble\n";
-		cout << "\t(5) Exit Program\n";
-		cout << "\t(6) View Sales Report\n";
+		cout << "\t(5) View Sales Report\n";
+		cout << "\t(6) Exit Program\n";
 
 		userInputMainMenu = 0;
 		cin >> userInputMainMenu;
@@ -441,8 +441,8 @@ int main() {
 		    } else {
 		        cout << "Invalid selection.\n";
 		    }
-		} else if (userInputMainMenu == 6) {
-		    cout << "\n--- Sales Commission Report ---\n";
+		} else if (userInputMainMenu == 5) {
+		    cout << "\n ----------- Sales Commission Report -----------\n";
 		    cout << left  << setw(25) << "Name"
 		         << right << setw(12) << "Gross Sales"
 		         << setw(12) << "Commission" << "\n";
@@ -470,7 +470,7 @@ int main() {
 		    }
 		    cout << string(50, '-') << "\n";
 
-		} else if (userInputMainMenu == 5) {
+		} else if (userInputMainMenu == 6) {
 			//This one stops the function
 			doMenu = false;
 		} else {
