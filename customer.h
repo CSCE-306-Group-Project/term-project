@@ -12,6 +12,10 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#include <deque>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
 
 using namespace std;
 
@@ -23,6 +27,7 @@ private:
 	string address_1;
 	string address_2;
 	string address_3;
+	string pswencoded;
 	int postalCode;
 	int phoneNumber;
 public:
@@ -32,7 +37,7 @@ public:
 		phoneNumber = 0;
 	}
 
-	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone, int idin = 0){
+	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone, string psw, int idin = 0){
 		firstName = fN;
 		lastName = lN;
 		address_1 = a1;
@@ -40,6 +45,7 @@ public:
 		address_3 = a3;
 		postalCode = postal;
 		phoneNumber = phone;
+		pswencoded = psw;
 
 		if(idin == 0){
 			id = rand();
@@ -48,31 +54,34 @@ public:
 		}
 	}
 
-	string getFirstName(){
+	string getFirstName() const{
 		return firstName;
 	}
-	string getLastName(){
+	string getLastName() const{
 		return lastName;
 	}
-	int getID(){
+	int getID() const{
 		return id;
 	}
-	string getFullAddress(){
+	string getFullAddress() const{
 		return address_1 + "\n" + address_2 + ", " + address_3;
 	}
-	string getAddress1(){
+	string getAddress1() const{
 		return address_1;
 	}
-	string getAddress2(){
+	string getAddress2() const{
 		return address_2;
 	}
-	string getAddress3(){
+	string getAddress3() const{
 		return address_3;
 	}
-	int getPostalCode(){
+	string getEncodedPassword() const{
+		return pswencoded;
+	}
+	int getPostalCode() const{
 		return postalCode;
 	}
-	int getPhone(){
+	int getPhone() const{
 		return phoneNumber;
 	}
 
@@ -103,7 +112,39 @@ public:
 	void setPhoneNumber(int phone){
 		phoneNumber = phone;
 	}
+	void setPassword(string pswin){
+		pswencoded = pswin;
+	}
 
+
+	void saveCustomers(const std::deque<Customer>& customers){
+		// clear customers.txt and rewrite it
+
+		// for each element in customers, write the following:
+		// customer->getFirstName() << ";" << customer->getLastName() << endl;
+
+
+		// open file in truncate (clears it)
+		ofstream file("customers.txt", ios::trunc);
+
+		if (!file.is_open()) {
+		    throw runtime_error("Failed to open customers.txt");
+		}
+
+		// 007547;wuleeohv;Genevieve;Shears;118 W William St;Michigan City;IN;46360
+
+
+	    for (const Customer& customer : customers) {
+	    	// pad ID with 0's
+	    	ostringstream ss;
+	    	ss << setw(5) << setfill('0') << customer.getID();
+
+	        file << ss.str() << ";" << customer.getEncodedPassword() << ";" << customer.getFirstName() << ";" << customer.getLastName()
+		         << ";" << customer.getAddress1() << ";" << customer.getAddress2() << ";" << customer.getAddress3() << ";" << customer.getPostalCode() << endl;
+	    }
+
+	    file.close();
+	}
 };
 
 

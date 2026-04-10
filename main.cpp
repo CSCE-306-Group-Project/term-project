@@ -20,6 +20,32 @@ deque<Customer> customers;
 unordered_map<int, Customer*> idIndex;
 unordered_map<string, vector<Customer*>> lastNameIndex;
 
+Customer* customerObj; // customerName displays in console
+
+string encodePassword(string pswin){
+	string charList = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+	// TODO
+
+	// Encode the password and return it
+
+
+	// REMOVE CODE AFTER THIS LINE AFTER IMPLEMENTING FUNCTION
+		static int i = 0;
+
+		i = i + 1;
+
+		if(i == 1){
+			cout << "[DEBUG] DEFAULT\n";
+			return "wuleeohv";
+		} else{
+			cout << "[DEBUG] NEW\n";
+			return "ee";
+		}
+
+	// REMOVE CODE ABOVE THIS LINE AFTER IMPLEMETING FUNCTION
+}
+
 
 void addCustomer(Customer c) {
 
@@ -44,6 +70,7 @@ void verifyAddressCASS(string a1, string a2, string a3, int pbar, int processDel
 }
 
 int main() {
+
 	// create empty associated array, Cust
 	Shop shop;
 	// pull from customers.txt
@@ -65,7 +92,7 @@ int main() {
 
 		// Create a string stream with the line from the input file
 		stringstream ss(customerdata);
-		string parts, fname, lname, a1, a2, a3;
+		string pswencode, parts, fname, lname, a1, a2, a3;
 		int postal, id;
 		int inputSectionNumber = 0;
 
@@ -76,26 +103,29 @@ int main() {
 			/*
 			 * inputSectionNumber meaning:
 			 * 0 = ID
-			 * 1 = first name
-			 * 2 = last name
-			 * 3 = street
-			 * 4 = city
-			 * 5 = state
-			 * 6 = zip code
+			 * 1 = password encode
+			 * 2 = first name
+			 * 3 = last name
+			 * 4 = street
+			 * 5 = city
+			 * 6 = state
+			 * 7 = zip code
 			 */
 			if (inputSectionNumber == 0) {
 				id = stoi(parts);
 			} else if (inputSectionNumber == 1) {
-				fname = parts;
+				pswencode = parts;
 			} else if (inputSectionNumber == 2) {
-				lname = parts;
+				fname = parts;
 			} else if (inputSectionNumber == 3) {
-				a1 = parts;
+				lname = parts;
 			} else if (inputSectionNumber == 4) {
-				a2 = parts;
+				a1 = parts;
 			} else if (inputSectionNumber == 5) {
-				a3 = parts;
+				a2 = parts;
 			} else if (inputSectionNumber == 6) {
+				a3 = parts;
+			} else if (inputSectionNumber == 7) {
 				postal = stoi(parts);
 			} else {
 				cout << "Invalid Input in customers.txt. Program Terminated";
@@ -106,11 +136,82 @@ int main() {
 			inputSectionNumber++;
 		}
 
-		Customer c(fname, lname, a1, a2, a3, postal, 0, id);
+		Customer c(fname, lname, a1, a2, a3, postal, 0, pswencode, id);
 		addCustomer(c);
 	}
 
 	inputFile.close();
+
+	bool doMenu = true;
+	int userInputMainMenu = 0;
+
+	bool isLoggedIn = false;
+	bool requirePasswordReset = false;
+
+	cout << "Welcome!\n";
+
+
+	while(isLoggedIn == false){
+		int userID;
+		string password;
+
+		cout << "Enter '0' at any time to exit.\nEnter your User ID:\n";
+		cin >> userID;
+
+		// mark the user as logged in to exit this loop, and prevent the main loop from running
+		if(userID == 0){
+			isLoggedIn = true;
+			doMenu = false;
+			break;
+		}
+
+		cout << "\nEnter your Password:\n";
+		cin >> password;
+
+		if(password == "0"){
+			isLoggedIn = true;
+			doMenu = false;
+			break;
+		}
+
+		/// check for user ID
+		if (idIndex.find(userID) != idIndex.end()){
+			// UserID is valid, check to see if password matches
+			Customer *c = idIndex[userID];
+
+			if(encodePassword(password) == c->getEncodedPassword()){
+				// Password matches, user is logged in
+				customerObj = c;
+				isLoggedIn = true;
+
+				if(password == "tribbles"){
+					// password is the default password, they must change this
+					requirePasswordReset = true;
+				}
+			}
+		}
+
+		if(isLoggedIn == false){
+			// If the user was not able to login, prompt them to try again
+			cout << "The credentials you entered do not match our records. Try again.\n";
+		}
+	}
+
+
+	while(requirePasswordReset == true){
+		string pswSetIn;
+
+		// User is required to reset their password. They are already logged in
+		cout << "Welcome " << customerObj->getFirstName() << "!\nFor your security, please set a new password:\n";
+		cin >> pswSetIn;
+
+		if(encodePassword(pswSetIn) == customerObj->getEncodedPassword()){
+			cout << "Your password cannot be the same as your previous password\n";
+		} else{
+			customerObj->setPassword(encodePassword(pswSetIn));
+			requirePasswordReset = false;
+		}
+	}
 
 	shop.initCustomerID(idIndex);
 
@@ -180,10 +281,6 @@ int main() {
 	transFile.close();
 
 
-	bool doMenu = true;
-	int userInputMainMenu = 0;
-	cout << "Welcome! ";
-
 	while (doMenu) {
 
 		if (cin.fail()) {
@@ -191,7 +288,7 @@ int main() {
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		}
 
-		cout << "\tEnter an integer to select a menu option." << endl;
+		cout << "\tWelcome " << customerObj->getFirstName() << "! Enter an integer to select a menu option." << endl;
 		cout << "\t(1) Add Customer\n";
 		cout << "\t(2) Lookup Customer\n";
 		cout << "\t(3) Buy Tribble\n";
@@ -209,33 +306,38 @@ int main() {
 			string a1;
 			string a2;
 			string a3;
+			string pswin;
+			string pswencoded;
 			int postal;
 			int phone;
 
-			cout << endl << "[Add Customer] (1/7) Customer First Name:" << endl;
+			cout << endl << "[Add Customer] (1/8) Customer First Name:" << endl;
 			getline(cin, fN);
-			cout << "[Add Customer] (2/7) Customer Last Name:" << endl;
+			cout << "[Add Customer] (2/8) Customer Last Name:" << endl;
 			getline(cin, lN);
-			cout << "[Add Customer] (3/7) Customer Address Line 1 (Street):" << endl;
+			cout << "[Add Customer] (3/8) Customer Address Line 1 (Street):" << endl;
 			getline(cin, a1);
-			cout << "[Add Customer] (4/7) Customer Address Line 2 (City/Locality):" << endl;
+			cout << "[Add Customer] (4/8) Customer Address Line 2 (City/Locality):" << endl;
 			getline(cin, a2);
-			cout << "[Add Customer] (5/7) Customer Address Line 3 (State/Providence):" << endl;
+			cout << "[Add Customer] (5/8) Customer Address Line 3 (State/Providence):" << endl;
 			getline(cin, a3);
-			cout << "[Add Customer] (6/7) Customer Postal Code:" << endl;
+			cout << "[Add Customer] (6/8) Customer Postal Code:" << endl;
 			cin >> postal;
 
 			cout << "Verifying address through Coding Accuracy Support System."<< endl;
 			verifyAddressCASS(a1, a2, a3, 20, 100);
 			//To simulate sending the address data out to an external database that checks addresses.
 
-			cout << "[Add Customer] (7/7) Customer Phone Number:" << endl;
+			cout << "[Add Customer] (7/8) Customer Phone Number:" << endl;
 			cin >> phone;
 
-			// TODO
+			cout << "[Add Customer] (8/8) Customer Password:" << endl;
+			cin >> pswin;
+
+			pswencoded = encodePassword(pswin);
 
 			int newID = shop.getNextCustomerID();
-			Customer c(fN, lN, a1, a2, a3, postal, phone, newID);
+			Customer c(fN, lN, a1, a2, a3, postal, phone, pswencoded, newID);
 			addCustomer(c);
 			cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
 
@@ -481,6 +583,7 @@ int main() {
 
 	cout << endl << "Goodbye";
 	shop.saveRainbowList("rainbowList.txt");
+	customerObj->saveCustomers(customers);
 	return 0;
 
 }
