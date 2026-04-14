@@ -142,76 +142,7 @@ int main() {
 
 	inputFile.close();
 
-	bool doMenu = true;
-	int userInputMainMenu = 0;
-
-	bool isLoggedIn = false;
-	bool requirePasswordReset = false;
-
 	cout << "Welcome!\n";
-
-
-	while(isLoggedIn == false){
-		int userID;
-		string password;
-
-		cout << "Enter '0' at any time to exit.\nEnter your User ID:\n";
-		cin >> userID;
-
-		// mark the user as logged in to exit this loop, and prevent the main loop from running
-		if(userID == 0){
-			isLoggedIn = true;
-			doMenu = false;
-			break;
-		}
-
-		cout << "\nEnter your Password:\n";
-		cin >> password;
-
-		if(password == "0"){
-			isLoggedIn = true;
-			doMenu = false;
-			break;
-		}
-
-		/// check for user ID
-		if (idIndex.find(userID) != idIndex.end()){
-			// UserID is valid, check to see if password matches
-			Customer *c = idIndex[userID];
-
-			if(encodePassword(password) == c->getEncodedPassword()){
-				// Password matches, user is logged in
-				customerObj = c;
-				isLoggedIn = true;
-
-				if(password == "tribbles"){
-					// password is the default password, they must change this
-					requirePasswordReset = true;
-				}
-			}
-		}
-
-		if(isLoggedIn == false){
-			// If the user was not able to login, prompt them to try again
-			cout << "The credentials you entered do not match our records. Try again.\n";
-		}
-	}
-
-
-	while(requirePasswordReset == true){
-		string pswSetIn;
-
-		// User is required to reset their password. They are already logged in
-		cout << "Welcome " << customerObj->getFirstName() << "!\nFor your security, please set a new password:\n";
-		cin >> pswSetIn;
-
-		if(encodePassword(pswSetIn) == customerObj->getEncodedPassword()){
-			cout << "Your password cannot be the same as your previous password\n";
-		} else{
-			customerObj->setPassword(encodePassword(pswSetIn));
-			requirePasswordReset = false;
-		}
-	}
 
 	shop.initCustomerID(idIndex);
 
@@ -280,6 +211,13 @@ int main() {
 	}
 	transFile.close();
 
+	bool doMenu = true;
+	int userInputMainMenu = 0;
+
+	// Handle logging in users
+	bool requireLogin = false;
+	bool isLoggedIn = false;
+	bool requirePasswordReset = false;
 
 	while (doMenu) {
 
@@ -288,295 +226,423 @@ int main() {
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		}
 
-		cout << "\tWelcome " << customerObj->getFirstName() << "! Enter an integer to select a menu option." << endl;
-		cout << "\t(1) Add Customer\n";
-		cout << "\t(2) Lookup Customer\n";
-		cout << "\t(3) Buy Tribble\n";
-		cout << "\t(4) Get placed on the waiting list for the elusive Rainbow Tribble\n";
-		cout << "\t(5) View Sales Report\n";
-		cout << "\t(6) Exit Program\n";
+		// Handle logins
 
-		userInputMainMenu = 0;
-		cin >> userInputMainMenu;
-		//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
-		cin.ignore(numeric_limits<streamsize>::max(), '\n');
-		if (userInputMainMenu == 1) {
-			string fN;
-			string lN;
-			string a1;
-			string a2;
-			string a3;
-			string pswin;
-			string pswencoded;
-			int postal;
-			int phone;
+		while(requireLogin == true && isLoggedIn == false){
+			int userID;
+			string password;
 
-			cout << endl << "[Add Customer] (1/8) Customer First Name:" << endl;
-			getline(cin, fN);
-			cout << "[Add Customer] (2/8) Customer Last Name:" << endl;
-			getline(cin, lN);
-			cout << "[Add Customer] (3/8) Customer Address Line 1 (Street):" << endl;
-			getline(cin, a1);
-			cout << "[Add Customer] (4/8) Customer Address Line 2 (City/Locality):" << endl;
-			getline(cin, a2);
-			cout << "[Add Customer] (5/8) Customer Address Line 3 (State/Providence):" << endl;
-			getline(cin, a3);
-			cout << "[Add Customer] (6/8) Customer Postal Code:" << endl;
-			cin >> postal;
+			cout << "Enter '0' at any time to exit.\nEnter your User ID:\n";
+			cin >> userID;
 
-			cout << "Verifying address through Coding Accuracy Support System."<< endl;
-			verifyAddressCASS(a1, a2, a3, 20, 100);
-			//To simulate sending the address data out to an external database that checks addresses.
+			// mark the user as logged in to exit this loop, and prevent the main loop from running
+			if(userID == 0){
+				requireLogin = false;
+				isLoggedIn = false;
+				requirePasswordReset = false;
+				break;
+			}
 
-			cout << "[Add Customer] (7/8) Customer Phone Number:" << endl;
-			cin >> phone;
+			cout << "\nEnter your Password:\n";
+			cin >> password;
 
-			cout << "[Add Customer] (8/8) Customer Password:" << endl;
-			cin >> pswin;
+			if(password == "0"){
+				requireLogin = false;
+				isLoggedIn = false;
+				requirePasswordReset = false;
+				break;
+			}
 
-			pswencoded = encodePassword(pswin);
+			/// check for user ID
+			if (idIndex.find(userID) != idIndex.end()){
+				// UserID is valid, check to see if password matches
+				Customer *c = idIndex[userID];
 
-			int newID = shop.getNextCustomerID();
-			Customer c(fN, lN, a1, a2, a3, postal, phone, pswencoded, newID);
-			addCustomer(c);
-			cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
+				if(encodePassword(password) == c->getEncodedPassword()){
+					// Password matches, user is logged in
+					customerObj = c;
+					isLoggedIn = true;
+
+					if(password == "tribbles"){
+						// password is the default password, they must change this
+						requirePasswordReset = true;
+					}
+				}
+			}
+
+			if(isLoggedIn == false){
+				// If the user was not able to login, prompt them to try again
+				cout << "The credentials you entered do not match our records. Try again.\n";
+			}
+		}
 
 
-		} else if (userInputMainMenu == 2) {
-			int customerSearchInputInt = 0;
+		while(requireLogin == true && isLoggedIn == true && requirePasswordReset == true){
+			string pswSetIn;
 
-			cout << endl
-					<< "[Lookup Customer] Enter an integer to select a search method:";
-			cout << endl << "\t(1) Search By Last Name";
-			cout << endl << "\t(2) Search By ID\n";
-			cout << endl << "\t(3) Search by Order #\n";
+			// User is required to reset their password. They are already logged in
+			cout << "Welcome " << customerObj->getFirstName() << "!\nFor your security, please set a new password:\n";
+			cin >> pswSetIn;
 
-			cin >> customerSearchInputInt;
-			//this next line also helps solve an issue with menu directory. Apparently it is called an input buffer problem
+			if(encodePassword(pswSetIn) == customerObj->getEncodedPassword()){
+				cout << "Your password cannot be the same as your previous password\n";
+			} else{
+				customerObj->setPassword(encodePassword(pswSetIn));
+				requirePasswordReset = false;
+
+				customerObj->saveCustomers(customers); // Save new password to DB in case they logout then log back in again
+			}
+		}
+
+		if(isLoggedIn == true){
+			cout << "\tWelcome " << customerObj->getFirstName() << "! Enter an integer to select a menu option." << endl;
+			cout << "\t(1) Change Password\n";
+			cout << "\t(2) Review Order History\n";
+			cout << "\t(3) Place an order\n";
+			cout << "\t(4) Logout\n";
+
+			userInputMainMenu = 0;
+			cin >> userInputMainMenu;
+			//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-			if (customerSearchInputInt == 1) {
 
-				string searchName;
+			if (userInputMainMenu == 1){
+				requirePasswordReset = true;
+				break;
+			} else if(userInputMainMenu == 2){
 
-				cout << endl << "[Lookup Customer] Enter last name to search:";
-				getline(cin, searchName);
+				// TODO
+				cout << "Order History: \n";
+			} else if(userInputMainMenu == 3){
+				//This one leads to the tribble buying menu
+				int qty;
 
-				if (lastNameIndex.count(searchName)) {
+				// Verify the customer actually exists before proceeding
+				cout << "\nWelcome to the Tribble Store, " << customerObj->getFirstName() << "!\n";
+				cout << "Enter the number of Tribbles you wish to purchase:\n";
+				cout << "\t(1) $9.50\n";
+				cout << "\t(2) $16.15\n";
+				cout << "\t(3) $25.88\n";
+				cout << "\t(4) $28.15\n";
+				cout << "\t(5) $30.00\n";
+				cout << "\t(6) Exit store\n";
+				cin >> qty;
 
-					vector<Customer*> results = lastNameIndex[searchName];
+				if (qty >= 1 && qty <= 5) {
+					Order* o = shop.processSale(customerObj->getID(), qty);
+					cout << "\n--- Receipt ---\n";
+					cout << "Customer: " << customerObj->getFirstName() << " " << customerObj->getLastName() << "\n";
+					cout << "You have purchased " << o->getQuantity() << " Tribble(s) for $"
+						 << fixed << setprecision(2) << o->getPrice() << "\n";
+					cout << "Order ID: " << o->getOrderID() << "\n";
+					cout << "---------------\n";
+				} else if (qty == 6) {
+					cout << "\nReturning to main menu.\n";
+				} else {
+					cout << "\nInvalid selection. Returning to main menu\n";
+				}
+			} else if(userInputMainMenu == 4){
+				requireLogin = false;
+				isLoggedIn = false;
+				requirePasswordReset = false;
+				continue;
+			}
 
-					if(results.size() == 1){
+		} else{
+			cout << "\tEnter an integer to select a menu option." << endl;
+			cout << "\t(1) Add Customer\n";
+			cout << "\t(2) Lookup Customer\n";
+			cout << "\t(3) Buy Tribble\n";
+			cout << "\t(4) Get placed on the waiting list for the elusive Rainbow Tribble\n";
+			cout << "\t(5) View Sales Report\n";
+			cout << "\t(6) Customer Portal\n";
+			cout << "\t(7) Exit Program\n";
 
-		            //if we only have one then just show it
-		            Customer* c = results[0];
+			userInputMainMenu = 0;
+			cin >> userInputMainMenu;
+			//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			if (userInputMainMenu == 1) {
+				string fN;
+				string lN;
+				string a1;
+				string a2;
+				string a3;
+				string pswin;
+				string pswencoded;
+				int postal;
+				int phone;
 
-		            cout << "\nFound Customer:\n";
-		            cout << c->getFirstName() << " "
-		                 << c->getLastName() << endl;
-		            cout << c->getFullAddress() << endl;
-		            cout << "Phone: " << c->getPhone() << endl;
-		            cout << "Customer ID: " << c->getID() << "\n";
+				cout << endl << "[Add Customer] (1/8) Customer First Name:" << endl;
+				getline(cin, fN);
+				cout << "[Add Customer] (2/8) Customer Last Name:" << endl;
+				getline(cin, lN);
+				cout << "[Add Customer] (3/8) Customer Address Line 1 (Street):" << endl;
+				getline(cin, a1);
+				cout << "[Add Customer] (4/8) Customer Address Line 2 (City/Locality):" << endl;
+				getline(cin, a2);
+				cout << "[Add Customer] (5/8) Customer Address Line 3 (State/Providence):" << endl;
+				getline(cin, a3);
+				cout << "[Add Customer] (6/8) Customer Postal Code:" << endl;
+				cin >> postal;
 
-		        } else {
+				cout << "Verifying address through Coding Accuracy Support System."<< endl;
+				verifyAddressCASS(a1, a2, a3, 20, 100);
+				//To simulate sending the address data out to an external database that checks addresses.
 
-		            // when we have multiple last name we can let user to select
-		            cout << "\nMultiple customers found:\n";
+				cout << "[Add Customer] (7/8) Customer Phone Number:" << endl;
+				cin >> phone;
 
-		            for (size_t i = 0; i < results.size(); ++i) {
-		                cout << "(" << i + 1 << ") "
-		                     << results[i]->getFirstName() << " "
-		                     << results[i]->getLastName()
-		                     << " (ID: " << results[i]->getID() << ")"
-		                     << endl;
-		            }
+				cout << "[Add Customer] (8/8) Customer Password:" << endl;
+				cin >> pswin;
 
-		            cout << "\nSelect a customer by number: ";
-		            int choice;
-		            cin >> choice;
+				pswencoded = encodePassword(pswin);
 
-		            if (choice > 0 && static_cast<size_t>(choice) <= results.size()) {
+				int newID = shop.getNextCustomerID();
+				Customer c(fN, lN, a1, a2, a3, postal, phone, pswencoded, newID);
+				addCustomer(c);
+				cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
 
-		                Customer* selected = results[static_cast<size_t>(choice) - 1];
 
-		                cout << "\nSelected Customer:\n";
-		                cout << selected->getFirstName() << " "
-		                     << selected->getLastName() << endl;
-		                cout << selected->getFullAddress() << endl;
-		                cout << "Phone: " << selected->getPhone() << endl;
-		                cout << "Customer ID: " << selected->getID() << "\n";
+			} else if (userInputMainMenu == 2) {
+				int customerSearchInputInt = 0;
 
-		            } else {
-		                cout << "\nInvalid selection.\n";
-		            }
-		        }
+				cout << endl
+						<< "[Lookup Customer] Enter an integer to select a search method:";
+				cout << endl << "\t(1) Search By Last Name";
+				cout << endl << "\t(2) Search By ID\n";
+				cout << endl << "\t(3) Search by Order #\n";
 
-		    } else {
-		        cout << "\nNo customer found.\n";
-		    }
+				cin >> customerSearchInputInt;
+				//this next line also helps solve an issue with menu directory. Apparently it is called an input buffer problem
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				if (customerSearchInputInt == 1) {
 
-			} else if (customerSearchInputInt == 2) {
-				int searchID;
+					string searchName;
 
-				cout << endl << "[Lookup Customer] Enter ID to search:";
-				cin >> searchID;
+					cout << endl << "[Lookup Customer] Enter last name to search:";
+					getline(cin, searchName);
 
-				if (idIndex.count(searchID)) {
+					if (lastNameIndex.count(searchName)) {
 
-					Customer *c = idIndex[searchID];
+						vector<Customer*> results = lastNameIndex[searchName];
 
-					cout << "\nFound Customer:\n";
-					cout << c->getFirstName() << " " << c->getLastName()
-							<< endl;
-					cout << c->getFullAddress() << endl;
-					cout << "Phone: " << c->getPhone() << endl;
-					cout << "Customer ID: " << c->getID() << "\n";
+						if(results.size() == 1){
+
+						//if we only have one then just show it
+						Customer* c = results[0];
+
+						cout << "\nFound Customer:\n";
+						cout << c->getFirstName() << " "
+							 << c->getLastName() << endl;
+						cout << c->getFullAddress() << endl;
+						cout << "Phone: " << c->getPhone() << endl;
+						cout << "Customer ID: " << c->getID() << "\n";
+
+					} else {
+
+						// when we have multiple last name we can let user to select
+						cout << "\nMultiple customers found:\n";
+
+						for (size_t i = 0; i < results.size(); ++i) {
+							cout << "(" << i + 1 << ") "
+								 << results[i]->getFirstName() << " "
+								 << results[i]->getLastName()
+								 << " (ID: " << results[i]->getID() << ")"
+								 << endl;
+						}
+
+						cout << "\nSelect a customer by number: ";
+						int choice;
+						cin >> choice;
+
+						if (choice > 0 && static_cast<size_t>(choice) <= results.size()) {
+
+							Customer* selected = results[static_cast<size_t>(choice) - 1];
+
+							cout << "\nSelected Customer:\n";
+							cout << selected->getFirstName() << " "
+								 << selected->getLastName() << endl;
+							cout << selected->getFullAddress() << endl;
+							cout << "Phone: " << selected->getPhone() << endl;
+							cout << "Customer ID: " << selected->getID() << "\n";
+
+						} else {
+							cout << "\nInvalid selection.\n";
+						}
+					}
 
 				} else {
 					cout << "\nNo customer found.\n";
 				}
 
-			} else if (customerSearchInputInt == 3) {
-			    int searchOrderID;
-			    cout << endl << "[Lookup Customer] Enter Order #: ";
-			    cin >> searchOrderID;
+				} else if (customerSearchInputInt == 2) {
+					int searchID;
 
-			    // Ask Shop to find the order — returns nullptr if it doesn't exist
-			    Order* foundOrder = shop.getOrderByID(searchOrderID);
+					cout << endl << "[Lookup Customer] Enter ID to search:";
+					cin >> searchID;
 
-			    if (foundOrder == nullptr) {
-			        cout << "\nNo order found with that ID.\n";
-			    } else {
-			        // Now find the customer who placed this order
-			        int custID = shop.getCustomerIDByOrderID(searchOrderID);
-			        Customer* c = idIndex[custID];
+					if (idIndex.count(searchID)) {
 
-			        cout << "\nOrder Found:\n";
-			        cout << foundOrder->to_string() << "\n";
-			        cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
-			        cout << c->getFullAddress() << "\n";
-			        cout << "Phone: " << c->getPhone() << "\n";
-			    }
+						Customer *c = idIndex[searchID];
+
+						cout << "\nFound Customer:\n";
+						cout << c->getFirstName() << " " << c->getLastName()
+								<< endl;
+						cout << c->getFullAddress() << endl;
+						cout << "Phone: " << c->getPhone() << endl;
+						cout << "Customer ID: " << c->getID() << "\n";
+
+					} else {
+						cout << "\nNo customer found.\n";
+					}
+
+				} else if (customerSearchInputInt == 3) {
+					int searchOrderID;
+					cout << endl << "[Lookup Customer] Enter Order #: ";
+					cin >> searchOrderID;
+
+					// Ask Shop to find the order — returns nullptr if it doesn't exist
+					Order* foundOrder = shop.getOrderByID(searchOrderID);
+
+					if (foundOrder == nullptr) {
+						cout << "\nNo order found with that ID.\n";
+					} else {
+						// Now find the customer who placed this order
+						int custID = shop.getCustomerIDByOrderID(searchOrderID);
+						Customer* c = idIndex[custID];
+
+						cout << "\nOrder Found:\n";
+						cout << foundOrder->to_string() << "\n";
+						cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
+						cout << c->getFullAddress() << "\n";
+						cout << "Phone: " << c->getPhone() << "\n";
+					}
+				}
+
+			} else if (userInputMainMenu == 3) {
+				//This one leads to the tribble buying menu
+				int custID, qty;
+
+				cout << "\nEnter Customer ID: ";
+				cin >> custID;
+
+				// Verify the customer actually exists before proceeding
+				if (!idIndex.count(custID)) {
+					cout << "\nNo customer found with that ID.\n";
+				} else {
+					Customer* c = idIndex[custID];
+					cout << "\nWelcome to the Tribble Store, " << c->getFirstName() << "!\n";
+					cout << "Enter the number of Tribbles you wish to purchase:\n";
+					cout << "\t(1) $9.50\n";
+					cout << "\t(2) $16.15\n";
+					cout << "\t(3) $25.88\n";
+					cout << "\t(4) $28.15\n";
+					cout << "\t(5) $30.00\n";
+					cout << "\t(6) Exit store\n";
+					cin >> qty;
+
+					if (qty >= 1 && qty <= 5) {
+						Order* o = shop.processSale(custID, qty);
+						cout << "\n--- Receipt ---\n";
+						cout << "Customer: " << c->getFirstName() << " " << c->getLastName() << "\n";
+						cout << "You have purchased " << o->getQuantity() << " Tribble(s) for $"
+							 << fixed << setprecision(2) << o->getPrice() << "\n";
+						cout << "Order ID: " << o->getOrderID() << "\n";
+						cout << "---------------\n";
+					} else if (qty == 6) {
+						cout << "\nReturning to main menu.\n";
+					} else {
+						cout << "\nInvalid selection.\n";
+					}
+				}
+			} else if (userInputMainMenu == 4) {
+				cout << "\n[Rainbow Tribble]\n";
+				cout << "\t(1) Add person to waiting list\n";
+				cout << "\t(2) Sell rainbow tribble to next person on list\n";
+				cout << "\t(3) Back\n";
+				cout << "Choice: ";
+
+				int rbChoice;
+				cin >> rbChoice;
+				//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				if (rbChoice == 1) {
+					int cid;
+					cout << "Enter customer ID: ";
+					cin >> cid;
+
+					if (!idIndex.count(cid)) {
+						cout << "Customer ID not found.\n";
+					} else if (!shop.addToRainbowList(cid)) {
+						cout << "Customer is already on the waiting list.\n";
+					} else {
+						Customer* c = idIndex[cid];
+						cout << c->getFirstName() << " " << c->getLastName()
+							 << " added to the rainbow tribble waiting list.\n";
+					}
+
+				} else if (rbChoice == 2) {
+					int cid = shop.peekRainbowFront();
+
+					if (cid == -1) {
+						cout << "The waiting list is empty.\n";
+					} else {
+						Customer* c = idIndex[cid];
+						Order* o = shop.processSale(cid, 1); // rainbow tribble, qty 1
+						shop.popRainbowFront();
+
+						cout << "\n--- Rainbow Tribble Sale Confirmed ---\n";
+						cout << "Customer: " << c->getFirstName() << " " << c->getLastName() << "\n";
+						cout << "You have purchased 1 Rainbow Tribble for $"
+							 << fixed << setprecision(2) << o->getPrice() << "\n";
+						cout << "Order ID: " << o->getOrderID() << "\n";
+						cout << "--------------------------------------\n";
+					}
+
+				} else if (rbChoice == 3) {
+					cout << "Returning to main menu.\n";
+				} else {
+					cout << "Invalid selection.\n";
+				}
+			} else if (userInputMainMenu == 5) {
+				cout << "\n ----------- Sales Commission Report -----------\n";
+				cout << left  << setw(25) << "Name"
+					 << right << setw(12) << "Gross Sales"
+					 << setw(12) << "Commission" << "\n";
+				cout << string(50, '-') << "\n";
+
+				for (salesTeam* p : staff) {
+					// Sum up all sales from everyone below this person in the hierarchy
+					double subSales = 0.0;
+					int myID = p->getSalesPersonID();
+					for (salesTeam* other : staff) {
+						if (other->getBossID() == myID) {
+							subSales += other->getGrossSales();
+
+							int subID = other->getSalesPersonID();
+							for (salesTeam* sub2 : staff) {
+								if (sub2->getBossID() == subID) {
+									subSales += sub2->getGrossSales();
+								}
+							}
+						}
+					}
+					cout << left  << setw(23) << p->getName()
+						 << right << setw(11) << fixed << setprecision(2) << p->getGrossSales()
+						 << setw(12) << p->getCommission(subSales) << "\n";
+				}
+				cout << string(50, '-') << "\n";
+
+			} else if (userInputMainMenu == 6) { // customer portal
+				// restart the main loop and show login screen
+				requireLogin = true;
+			} else if (userInputMainMenu == 7) {
+				//This one stops the function
+				doMenu = false;
+			} else {
+				cout << endl << "The input provided is not allowed.";
 			}
-
-		} else if (userInputMainMenu == 3) {
-			//This one leads to the tribble buying menu
-			int custID, qty;
-
-			    cout << "\nEnter Customer ID: ";
-			    cin >> custID;
-
-			    // Verify the customer actually exists before proceeding
-			    if (!idIndex.count(custID)) {
-			        cout << "\nNo customer found with that ID.\n";
-			    } else {
-			        Customer* c = idIndex[custID];
-			        cout << "\nWelcome to the Tribble Store, " << c->getFirstName() << "!\n";
-			        cout << "Enter the number of Tribbles you wish to purchase:\n";
-			        cout << "\t(1) $9.50\n";
-			        cout << "\t(2) $16.15\n";
-			        cout << "\t(3) $25.88\n";
-			        cout << "\t(4) $28.15\n";
-			        cout << "\t(5) $30.00\n";
-			        cout << "\t(6) Exit store\n";
-			        cin >> qty;
-
-			        if (qty >= 1 && qty <= 5) {
-			            Order* o = shop.processSale(custID, qty);
-			            cout << "\n--- Receipt ---\n";
-			            cout << "Customer: " << c->getFirstName() << " " << c->getLastName() << "\n";
-			            cout << "You have purchased " << o->getQuantity() << " Tribble(s) for $"
-			                 << fixed << setprecision(2) << o->getPrice() << "\n";
-			            cout << "Order ID: " << o->getOrderID() << "\n";
-			            cout << "---------------\n";
-			        } else if (qty == 6) {
-			            cout << "\nReturning to main menu.\n";
-			        } else {
-			            cout << "\nInvalid selection.\n";
-			        }
-			    }
-		} else if (userInputMainMenu == 4) {
-		    cout << "\n[Rainbow Tribble]\n";
-		    cout << "\t(1) Add person to waiting list\n";
-		    cout << "\t(2) Sell rainbow tribble to next person on list\n";
-		    cout << "\t(3) Back\n";
-		    cout << "Choice: ";
-
-		    int rbChoice;
-		    cin >> rbChoice;
-		    //this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
-		    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-		    if (rbChoice == 1) {
-		        int cid;
-		        cout << "Enter customer ID: ";
-		        cin >> cid;
-
-		        if (!idIndex.count(cid)) {
-		            cout << "Customer ID not found.\n";
-		        } else if (!shop.addToRainbowList(cid)) {
-		            cout << "Customer is already on the waiting list.\n";
-		        } else {
-		            Customer* c = idIndex[cid];
-		            cout << c->getFirstName() << " " << c->getLastName()
-		                 << " added to the rainbow tribble waiting list.\n";
-		        }
-
-		    } else if (rbChoice == 2) {
-		        int cid = shop.peekRainbowFront();
-
-		        if (cid == -1) {
-		            cout << "The waiting list is empty.\n";
-		        } else {
-		            Customer* c = idIndex[cid];
-		            Order* o = shop.processSale(cid, 1); // rainbow tribble, qty 1
-		            shop.popRainbowFront();
-
-		            cout << "\n--- Rainbow Tribble Sale Confirmed ---\n";
-		            cout << "Customer: " << c->getFirstName() << " " << c->getLastName() << "\n";
-		            cout << "You have purchased 1 Rainbow Tribble for $"
-		                 << fixed << setprecision(2) << o->getPrice() << "\n";
-		            cout << "Order ID: " << o->getOrderID() << "\n";
-		            cout << "--------------------------------------\n";
-		        }
-
-		    } else if (rbChoice == 3) {
-		        cout << "Returning to main menu.\n";
-		    } else {
-		        cout << "Invalid selection.\n";
-		    }
-		} else if (userInputMainMenu == 5) {
-		    cout << "\n ----------- Sales Commission Report -----------\n";
-		    cout << left  << setw(25) << "Name"
-		         << right << setw(12) << "Gross Sales"
-		         << setw(12) << "Commission" << "\n";
-		    cout << string(50, '-') << "\n";
-
-		    for (salesTeam* p : staff) {
-		        // Sum up all sales from everyone below this person in the hierarchy
-		        double subSales = 0.0;
-		        int myID = p->getSalesPersonID();
-		        for (salesTeam* other : staff) {
-		            if (other->getBossID() == myID) {
-		                subSales += other->getGrossSales();
-
-		                int subID = other->getSalesPersonID();
-		                for (salesTeam* sub2 : staff) {
-		                    if (sub2->getBossID() == subID) {
-		                        subSales += sub2->getGrossSales();
-		                    }
-		                }
-		            }
-		        }
-		        cout << left  << setw(23) << p->getName()
-		             << right << setw(11) << fixed << setprecision(2) << p->getGrossSales()
-		             << setw(12) << p->getCommission(subSales) << "\n";
-		    }
-		    cout << string(50, '-') << "\n";
-
-		} else if (userInputMainMenu == 6) {
-			//This one stops the function
-			doMenu = false;
-		} else {
-			cout << endl << "The input provided is not allowed.";
 		}
 
 	}
