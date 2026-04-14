@@ -313,6 +313,10 @@ int main() {
 
 				// TODO
 				cout << "Order History: \n";
+
+				for (auto order: shop.getOrdersByCustomerID(customerObj->getID())){
+					cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+				}
 			} else if(userInputMainMenu == 3){
 				//This one leads to the tribble buying menu
 				int qty;
