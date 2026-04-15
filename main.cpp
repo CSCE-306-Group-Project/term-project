@@ -22,28 +22,31 @@ unordered_map<string, vector<Customer*>> lastNameIndex;
 
 Customer* customerObj; // customerName displays in console
 
+bool validatePassword(const string& psw) {
+    string charList = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    // Must be at least 4 characters
+    if (psw.length() < 4) return false;
+
+    // Every character must appear somewhere in charList
+    for (char ch : psw) {
+        if (charList.find(ch) == string::npos) return false;
+    }
+    return true;
+}
+
+
 string encodePassword(string pswin){
 	string charList = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	string encoded = "";
 
-	// TODO
+	for (char ch : pswin) {
+		int index = charList.find(ch);  // get 0-based position
+		int shifted = (index + 3) % 62; // shift 3 to the right, wrapping around
+		encoded += charList[shifted];   // look up the encoded character
+	}
+	return encoded;
 
-	// Encode the password and return it
-
-
-	// REMOVE CODE AFTER THIS LINE AFTER IMPLEMENTING FUNCTION
-		static int i = 0;
-
-		i = i + 1;
-
-		if(i == 1){
-			cout << "[DEBUG] DEFAULT\n";
-			return "wuleeohv";
-		} else{
-			cout << "[DEBUG] NEW\n";
-			return "ee";
-		}
-
-	// REMOVE CODE ABOVE THIS LINE AFTER IMPLEMETING FUNCTION
 }
 
 
@@ -283,6 +286,17 @@ int main() {
 			// User is required to reset their password. They are already logged in
 			cout << "Welcome " << customerObj->getFirstName() << "!\nFor your security, please set a new password:\n";
 			cin >> pswSetIn;
+
+			//Checking if user is following the password criteria
+			if (!validatePassword(pswSetIn)) {
+			    cout << "Invalid password. Must be at least 4 alphanumeric characters. Try again.\n";
+			} else if (encodePassword(pswSetIn) == customerObj->getEncodedPassword()) {
+			    cout << "Your password cannot be the same as your previous password.\n";
+			} else {
+			    customerObj->setPassword(encodePassword(pswSetIn));
+			    requirePasswordReset = false;
+			    customerObj->saveCustomers(customers);
+			}
 
 			if(encodePassword(pswSetIn) == customerObj->getEncodedPassword()){
 				cout << "Your password cannot be the same as your previous password\n";
