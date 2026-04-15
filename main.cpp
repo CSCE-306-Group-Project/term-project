@@ -207,6 +207,7 @@ int main() {
 	    int spID    = stoi(spIDstr);
 	    int orderID = stoi(orderIDstr);
 
+
 	    if (spID == 0) continue; // in-store purchase, no salesperson
 	    if (staffByID.count(spID) && orderPrices.count(orderID)) {
 	        staffByID[spID]->addSale(orderPrices[orderID]);
@@ -295,20 +296,11 @@ int main() {
 			} else {
 			    customerObj->setPassword(encodePassword(pswSetIn));
 			    requirePasswordReset = false;
-			    customerObj->saveCustomers(customers);
-			}
-
-			if(encodePassword(pswSetIn) == customerObj->getEncodedPassword()){
-				cout << "Your password cannot be the same as your previous password\n";
-			} else{
-				customerObj->setPassword(encodePassword(pswSetIn));
-				requirePasswordReset = false;
-
-				customerObj->saveCustomers(customers); // Save new password to DB in case they logout then log back in again
+			    customerObj->saveCustomers(customers); // Save new password to DB in case they logout then log back in again
 			}
 		}
 
-		if(isLoggedIn == true){
+		if(isLoggedIn == true && requirePasswordReset == false){
 			cout << "\tWelcome " << customerObj->getFirstName() << "! Enter an integer to select a menu option." << endl;
 			cout << "\t(1) Change Password\n";
 			cout << "\t(2) Review Order History\n";
@@ -322,11 +314,17 @@ int main() {
 
 			if (userInputMainMenu == 1){
 				requirePasswordReset = true;
-				break;
+				continue;
 			} else if(userInputMainMenu == 2){
 
 				// TODO
 				cout << "Order History: \n";
+
+				for (auto order: shop.getOrdersByCustomerID(customerObj->getID())){
+					cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+				}
+
+
 			} else if(userInputMainMenu == 3){
 				//This one leads to the tribble buying menu
 				int qty;

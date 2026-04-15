@@ -70,7 +70,8 @@ public:
         // This is where we write and don't read to a file. This will keep track of orders
         ofstream outFile("transactions.txt", std::ios::app);
         if (outFile.is_open()) {
-            outFile << customerID << ";" << newOrder->getOrderID() << endl;
+        	// 000000 is salesStaff ID
+            outFile << customerID << ";000000;" << newOrder->getOrderID() << endl;
             outFile.close();
         } else {
             cout << "Warning: Could not write to transactions.txt\n";
