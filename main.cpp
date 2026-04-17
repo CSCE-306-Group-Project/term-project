@@ -216,6 +216,7 @@ int main() {
 	transFile.close();
 
 	bool doMenu = true;
+	bool waitForAction = false;
 	int userInputMainMenu = 0;
 
 	// Handle logging in users
@@ -228,6 +229,14 @@ int main() {
 		if (cin.fail()) {
 			cin.clear();
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+
+		// Prevent menu from immediately displaying after large outputs
+		if(waitForAction){
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cout << "Press [ENTER] to return to the menu";
+			cin.get();
+			waitForAction = false;
 		}
 
 		// Handle logins
@@ -300,6 +309,7 @@ int main() {
 			}
 		}
 
+
 		if(isLoggedIn == true && requirePasswordReset == false){
 			cout << "\tWelcome " << customerObj->getFirstName() << "! Enter an integer to select a menu option." << endl;
 			cout << "\t(1) Change Password\n";
@@ -317,12 +327,15 @@ int main() {
 				continue;
 			} else if(userInputMainMenu == 2){
 
-				// TODO
 				cout << "Order History: \n";
 
 				for (auto order: shop.getOrdersByCustomerID(customerObj->getID())){
 					cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
 				}
+
+				// TODO
+				// After fixing getOrdersByCustomerID, test the line below to see if it is still buggy or not
+				//waitForAction = true;
 
 
 			} else if(userInputMainMenu == 3){
@@ -348,6 +361,8 @@ int main() {
 						 << fixed << setprecision(2) << o->getPrice() << "\n";
 					cout << "Order ID: " << o->getOrderID() << "\n";
 					cout << "---------------\n";
+
+					waitForAction = true;
 				} else if (qty == 6) {
 					cout << "\nReturning to main menu.\n";
 				} else {
@@ -415,6 +430,8 @@ int main() {
 				addCustomer(c);
 				cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
 
+				waitForAction = true;
+
 
 			} else if (userInputMainMenu == 2) {
 				int customerSearchInputInt = 0;
@@ -449,7 +466,12 @@ int main() {
 							 << c->getLastName() << endl;
 						cout << c->getFullAddress() << endl;
 						cout << "Phone: " << c->getPhone() << endl;
-						cout << "Customer ID: " << c->getID() << "\n";
+						cout << "Customer ID: " << c->getID() << "\nOrders:\n";
+						for (auto order: shop.getOrdersByCustomerID(c->getID())){
+							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+						}
+
+						waitForAction = true;
 
 					} else {
 
@@ -477,7 +499,13 @@ int main() {
 								 << selected->getLastName() << endl;
 							cout << selected->getFullAddress() << endl;
 							cout << "Phone: " << selected->getPhone() << endl;
-							cout << "Customer ID: " << selected->getID() << "\n";
+							cout << "Customer ID: " << selected->getID() << "\nOrders:\n";
+
+							for (auto order: shop.getOrdersByCustomerID(selected->getID())){
+								cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+							}
+
+							waitForAction = true;
 
 						} else {
 							cout << "\nInvalid selection.\n";
@@ -503,7 +531,13 @@ int main() {
 								<< endl;
 						cout << c->getFullAddress() << endl;
 						cout << "Phone: " << c->getPhone() << endl;
-						cout << "Customer ID: " << c->getID() << "\n";
+						cout << "Customer ID: " << c->getID() << "\nOrders:\n";
+
+						for (auto order: shop.getOrdersByCustomerID(c->getID())){
+							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+						}
+
+						waitForAction = true;
 
 					} else {
 						cout << "\nNo customer found.\n";
@@ -528,7 +562,13 @@ int main() {
 						cout << foundOrder->to_string() << "\n";
 						cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
 						cout << c->getFullAddress() << "\n";
-						cout << "Phone: " << c->getPhone() << "\n";
+						cout << "Phone: " << c->getPhone() << "\nOrders:\n";
+
+						for (auto order: shop.getOrdersByCustomerID(c->getID())){
+							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+						}
+
+						waitForAction = true;
 					}
 				}
 
@@ -562,6 +602,8 @@ int main() {
 							 << fixed << setprecision(2) << o->getPrice() << "\n";
 						cout << "Order ID: " << o->getOrderID() << "\n";
 						cout << "---------------\n";
+
+						waitForAction = true;
 					} else if (qty == 6) {
 						cout << "\nReturning to main menu.\n";
 					} else {
@@ -610,6 +652,8 @@ int main() {
 							 << fixed << setprecision(2) << o->getPrice() << "\n";
 						cout << "Order ID: " << o->getOrderID() << "\n";
 						cout << "--------------------------------------\n";
+
+						waitForAction = true;
 					}
 
 				} else if (rbChoice == 3) {
@@ -646,6 +690,8 @@ int main() {
 				}
 				cout << string(50, '-') << "\n";
 
+				waitForAction = true;
+
 			} else if (userInputMainMenu == 6) { // customer portal
 				// restart the main loop and show login screen
 				requireLogin = true;
@@ -653,7 +699,7 @@ int main() {
 				//This one stops the function
 				doMenu = false;
 			} else {
-				cout << endl << "The input provided is not allowed.";
+				cout << endl << "The provided input is not allowed. Returning to the main menu.";
 			}
 		}
 
