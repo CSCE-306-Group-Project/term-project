@@ -17,6 +17,7 @@
 #include "order.h"
 #include "transaction.h"
 #include <string>
+#include <deque>
 using namespace std;
 
 class Shop {
@@ -92,7 +93,7 @@ public:
        }
 
         // Advance the counter so the next order gets a unique ID by adding one
-        nextOrderID++;
+        nextOrderID = to_string(stoi(nextOrderID) + 1);
 
         return newOrder;
     }
@@ -182,18 +183,20 @@ public:
     // Call this after all customers are loaded from file, passing in
     // the idIndex so Shop can find the current highest ID
     void initCustomerID(const unordered_map<string, Customer*>& idIndex) {
-        string maxID = 0;
+        string maxID = "0";
         for (const auto& pair : idIndex) {
             if (pair.first > maxID) maxID = pair.first;
         }
-        nextCustomerID = maxID + 1;
+        nextCustomerID = to_string(stoi(maxID) + 1);
     }
 
     // Returns the next available customer ID and advances the counter
     string getNextCustomerID() {
-        return string(nextCustomerID++);
-    }
+        string current = nextCustomerID;
+        nextCustomerID = to_string(stoi(nextCustomerID) + 1);
+        return current;
 
+    };
 
 };
 
