@@ -7,22 +7,22 @@
 
 #ifndef TRANSACTION_H_
 #define TRANSACTION_H_
-
+#include <string>
 
 class Transaction {
 private:
-    int customerID;
+    string customerID;
     int orderID;
 
 public:
     // constructor
-    Transaction() : customerID(0), orderID(0) {}
+    Transaction() : customerID(""), orderID(0) {}
 
     // This will allow us to tie a customer to a specific order
-    Transaction(int cID, int oID) : customerID(cID), orderID(oID) {}
+    Transaction(string cID, int oID) : customerID(cID), orderID(oID) {}
 
     // Getters
-    int getCustomerID() const { return customerID; }
+    string getCustomerID() const { return customerID; }
     int getOrderID() const { return orderID; }
 };
 

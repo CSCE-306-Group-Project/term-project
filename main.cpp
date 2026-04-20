@@ -10,45 +10,25 @@
 #include <deque>
 #include <chrono>
 #include <thread>
-
+#include <iomanip>
 #include "shop.h"
 #include "salesStaff.h"
 
 using namespace std;
 
 deque<Customer> customers;
-unordered_map<int, Customer*> idIndex;
+unordered_map<string, Customer*> idIndex;
 unordered_map<string, vector<Customer*>> lastNameIndex;
 
 Customer* customerObj; // customerName displays in console
 
-bool validatePassword(const string& psw) {
-    string charList = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    // Must be at least 4 characters
-    if (psw.length() < 4) return false;
-
-    // Every character must appear somewhere in charList
-    for (char ch : psw) {
-        if (charList.find(ch) == string::npos) return false;
-    }
-    return true;
-}
-
-
 string encodePassword(string pswin){
-	string charList = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	string encoded = "";
-
-	for (char ch : pswin) {
-		int index = charList.find(ch);  // get 0-based position
-		int shifted = (index + 3) % 62; // shift 3 to the right, wrapping around
-		encoded += charList[shifted];   // look up the encoded character
-	}
-	return encoded;
-
+    string result = "";
+    for(char c : pswin){
+        result += char(c + 2);
+    }
+    return result;
 }
-
 
 void addCustomer(Customer c) {
 
@@ -96,7 +76,8 @@ int main() {
 		// Create a string stream with the line from the input file
 		stringstream ss(customerdata);
 		string pswencode, parts, fname, lname, a1, a2, a3;
-		int postal, id;
+		string id;
+		int postal;
 		int inputSectionNumber = 0;
 
 		// For each section of the user input
@@ -115,7 +96,7 @@ int main() {
 			 * 7 = zip code
 			 */
 			if (inputSectionNumber == 0) {
-				id = stoi(parts);
+				id = parts;
 			} else if (inputSectionNumber == 1) {
 				pswencode = parts;
 			} else if (inputSectionNumber == 2) {
@@ -207,7 +188,6 @@ int main() {
 	    int spID    = stoi(spIDstr);
 	    int orderID = stoi(orderIDstr);
 
-
 	    if (spID == 0) continue; // in-store purchase, no salesperson
 	    if (staffByID.count(spID) && orderPrices.count(orderID)) {
 	        staffByID[spID]->addSale(orderPrices[orderID]);
@@ -216,7 +196,6 @@ int main() {
 	transFile.close();
 
 	bool doMenu = true;
-	bool waitForAction = false;
 	int userInputMainMenu = 0;
 
 	// Handle logging in users
@@ -231,25 +210,17 @@ int main() {
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		}
 
-		// Prevent menu from immediately displaying after large outputs
-		if(waitForAction){
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-			cout << "Press [ENTER] to return to the menu";
-			cin.get();
-			waitForAction = false;
-		}
-
 		// Handle logins
 
 		while(requireLogin == true && isLoggedIn == false){
-			int userID;
+			string userID;
 			string password;
 
 			cout << "Enter '0' at any time to exit.\nEnter your User ID:\n";
 			cin >> userID;
 
 			// mark the user as logged in to exit this loop, and prevent the main loop from running
-			if(userID == 0){
+			if(userID == "0" ){
 				requireLogin = false;
 				isLoggedIn = false;
 				requirePasswordReset = false;
@@ -297,20 +268,17 @@ int main() {
 			cout << "Welcome " << customerObj->getFirstName() << "!\nFor your security, please set a new password:\n";
 			cin >> pswSetIn;
 
-			//Checking if user is following the password criteria
-			if (!validatePassword(pswSetIn)) {
-			    cout << "Invalid password. Must be at least 4 alphanumeric characters. Try again.\n";
-			} else if (encodePassword(pswSetIn) == customerObj->getEncodedPassword()) {
-			    cout << "Your password cannot be the same as your previous password.\n";
-			} else {
-			    customerObj->setPassword(encodePassword(pswSetIn));
-			    requirePasswordReset = false;
-			    customerObj->saveCustomers(customers); // Save new password to DB in case they logout then log back in again
+			if(encodePassword(pswSetIn) == customerObj->getEncodedPassword()){
+				cout << "Your password cannot be the same as your previous password\n";
+			} else{
+				customerObj->setPassword(encodePassword(pswSetIn));
+				requirePasswordReset = false;
+
+				customerObj->saveCustomers(customers); // Save new password to DB in case they logout then log back in again
 			}
 		}
 
-
-		if(isLoggedIn == true && requirePasswordReset == false){
+		if(isLoggedIn == true){
 			cout << "\tWelcome " << customerObj->getFirstName() << "! Enter an integer to select a menu option." << endl;
 			cout << "\t(1) Change Password\n";
 			cout << "\t(2) Review Order History\n";
@@ -324,20 +292,11 @@ int main() {
 
 			if (userInputMainMenu == 1){
 				requirePasswordReset = true;
-				continue;
+				break;
 			} else if(userInputMainMenu == 2){
 
-				cout << "Order History: \n";
-
-				for (auto order: shop.getOrdersByCustomerID(customerObj->getID())){
-					cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
-				}
-
 				// TODO
-				// After fixing getOrdersByCustomerID, test the line below to see if it is still buggy or not
-				//waitForAction = true;
-
-
+				cout << "Order History: \n";
 			} else if(userInputMainMenu == 3){
 				//This one leads to the tribble buying menu
 				int qty;
@@ -361,8 +320,6 @@ int main() {
 						 << fixed << setprecision(2) << o->getPrice() << "\n";
 					cout << "Order ID: " << o->getOrderID() << "\n";
 					cout << "---------------\n";
-
-					waitForAction = true;
 				} else if (qty == 6) {
 					cout << "\nReturning to main menu.\n";
 				} else {
@@ -425,12 +382,10 @@ int main() {
 
 				pswencoded = encodePassword(pswin);
 
-				int newID = shop.getNextCustomerID();
+				string newID = shop.getNextCustomerID();
 				Customer c(fN, lN, a1, a2, a3, postal, phone, pswencoded, newID);
 				addCustomer(c);
 				cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
-
-				waitForAction = true;
 
 
 			} else if (userInputMainMenu == 2) {
@@ -466,12 +421,7 @@ int main() {
 							 << c->getLastName() << endl;
 						cout << c->getFullAddress() << endl;
 						cout << "Phone: " << c->getPhone() << endl;
-						cout << "Customer ID: " << c->getID() << "\nOrders:\n";
-						for (auto order: shop.getOrdersByCustomerID(c->getID())){
-							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
-						}
-
-						waitForAction = true;
+						cout << "Customer ID: " << c->getID() << "\n";
 
 					} else {
 
@@ -499,13 +449,7 @@ int main() {
 								 << selected->getLastName() << endl;
 							cout << selected->getFullAddress() << endl;
 							cout << "Phone: " << selected->getPhone() << endl;
-							cout << "Customer ID: " << selected->getID() << "\nOrders:\n";
-
-							for (auto order: shop.getOrdersByCustomerID(selected->getID())){
-								cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
-							}
-
-							waitForAction = true;
+							cout << "Customer ID: " << selected->getID() << "\n";
 
 						} else {
 							cout << "\nInvalid selection.\n";
@@ -517,7 +461,7 @@ int main() {
 				}
 
 				} else if (customerSearchInputInt == 2) {
-					int searchID;
+					string searchID;
 
 					cout << endl << "[Lookup Customer] Enter ID to search:";
 					cin >> searchID;
@@ -531,13 +475,7 @@ int main() {
 								<< endl;
 						cout << c->getFullAddress() << endl;
 						cout << "Phone: " << c->getPhone() << endl;
-						cout << "Customer ID: " << c->getID() << "\nOrders:\n";
-
-						for (auto order: shop.getOrdersByCustomerID(c->getID())){
-							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
-						}
-
-						waitForAction = true;
+						cout << "Customer ID: " << c->getID() << "\n";
 
 					} else {
 						cout << "\nNo customer found.\n";
@@ -555,26 +493,21 @@ int main() {
 						cout << "\nNo order found with that ID.\n";
 					} else {
 						// Now find the customer who placed this order
-						int custID = shop.getCustomerIDByOrderID(searchOrderID);
+						string custID = shop.getCustomerIDByOrderID(searchOrderID);
 						Customer* c = idIndex[custID];
 
 						cout << "\nOrder Found:\n";
 						cout << foundOrder->to_string() << "\n";
 						cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
 						cout << c->getFullAddress() << "\n";
-						cout << "Phone: " << c->getPhone() << "\nOrders:\n";
-
-						for (auto order: shop.getOrdersByCustomerID(c->getID())){
-							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
-						}
-
-						waitForAction = true;
+						cout << "Phone: " << c->getPhone() << "\n";
 					}
 				}
 
 			} else if (userInputMainMenu == 3) {
 				//This one leads to the tribble buying menu
-				int custID, qty;
+				string custID;
+				int qty;
 
 				cout << "\nEnter Customer ID: ";
 				cin >> custID;
@@ -602,8 +535,6 @@ int main() {
 							 << fixed << setprecision(2) << o->getPrice() << "\n";
 						cout << "Order ID: " << o->getOrderID() << "\n";
 						cout << "---------------\n";
-
-						waitForAction = true;
 					} else if (qty == 6) {
 						cout << "\nReturning to main menu.\n";
 					} else {
@@ -622,7 +553,7 @@ int main() {
 				//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
 				cin.ignore(numeric_limits<streamsize>::max(), '\n');
 				if (rbChoice == 1) {
-					int cid;
+					string cid;
 					cout << "Enter customer ID: ";
 					cin >> cid;
 
@@ -637,9 +568,9 @@ int main() {
 					}
 
 				} else if (rbChoice == 2) {
-					int cid = shop.peekRainbowFront();
+					string cid = shop.peekRainbowFront();
 
-					if (cid == -1) {
+					if (cid == cid.empty()) {
 						cout << "The waiting list is empty.\n";
 					} else {
 						Customer* c = idIndex[cid];
@@ -652,8 +583,6 @@ int main() {
 							 << fixed << setprecision(2) << o->getPrice() << "\n";
 						cout << "Order ID: " << o->getOrderID() << "\n";
 						cout << "--------------------------------------\n";
-
-						waitForAction = true;
 					}
 
 				} else if (rbChoice == 3) {
@@ -690,8 +619,6 @@ int main() {
 				}
 				cout << string(50, '-') << "\n";
 
-				waitForAction = true;
-
 			} else if (userInputMainMenu == 6) { // customer portal
 				// restart the main loop and show login screen
 				requireLogin = true;
@@ -699,7 +626,7 @@ int main() {
 				//This one stops the function
 				doMenu = false;
 			} else {
-				cout << endl << "The provided input is not allowed. Returning to the main menu.";
+				cout << endl << "The input provided is not allowed.";
 			}
 		}
 
@@ -707,7 +634,11 @@ int main() {
 
 	cout << endl << "Goodbye";
 	shop.saveRainbowList("rainbowList.txt");
-	customerObj->saveCustomers(customers);
+
+	if (customerObj != nullptr) {
+	    customerObj->saveCustomers(customers);
+	}
+
 	return 0;
 
 }

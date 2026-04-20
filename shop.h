@@ -16,7 +16,7 @@
 #include <ctime>
 #include "order.h"
 #include "transaction.h"
-
+#include <string>
 using namespace std;
 
 class Shop {
@@ -27,13 +27,13 @@ private:
     // Transactions keyed by order ID
     unordered_map<int, Transaction*> transactions;
 
-    deque<int> rainbowQueue;
+    deque<string> rainbowQueue;
     // we want each order to retrieve a unique ID, so basing it off real stores, we decided
     //to increment it by one in this class only so no other code could mess with it.
-    int nextOrderID;
+    string nextOrderID;
 
     //This will allow us to give new customers ID
-    int nextCustomerID;
+    string nextCustomerID;
 
     // Here are the prices for the Tribbles, listed in an array.
     const double prices[6] = {0.0, 9.50, 16.15, 25.88, 28.15, 30.00};
@@ -42,7 +42,7 @@ public:
     // Constructor — nextOrderID starts at 1, ready for the first sale. Yippee
 
     // Constructor – used in making new IDs for inputed customers
-    Shop() : nextOrderID(1), nextCustomerID(1) {}
+    Shop() : nextOrderID("1"), nextCustomerID("1") {}
 
     // Destructor
     //using pointers uses memory, so to save up on some space we delete them when cleaning up
@@ -54,7 +54,7 @@ public:
     //The main function for option 3 in the menu. It takes a customer ID and quantity,
     // builds the Order and Transaction objects, writes to transactions.txt,
     // and returns the created Order so main() can print the receipt.
-    Order* processSale(int customerID, int quantity) {
+    Order* processSale(string customerID, int quantity) {
         // Look up the correct price using our array a little up on this page
         double total = prices[quantity];
 
@@ -70,8 +70,7 @@ public:
         // This is where we write and don't read to a file. This will keep track of orders
         ofstream outFile("transactions.txt", std::ios::app);
         if (outFile.is_open()) {
-        	// 000000 is salesStaff ID
-            outFile << customerID << ";000000;" << newOrder->getOrderID() << endl;
+            outFile << customerID << ";" << newOrder->getOrderID() << endl;
             outFile.close();
         } else {
             cout << "Warning: Could not write to transactions.txt\n";
@@ -102,7 +101,7 @@ public:
     // every transaction that belongs to the given customer, then collects
     // the corresponding Order objects into a vector and returns them.
     // This keeps all the search logic out of main() to not clutter it.
-    vector<Order*> getOrdersByCustomerID(int customerID) {
+    vector<Order*> getOrdersByCustomerID(string customerID) {
         vector<Order*> result;
         for (auto& pair : transactions) {
             if (pair.second->getCustomerID() == customerID) {
@@ -124,17 +123,17 @@ public:
     // Looks up the transaction keyed on order ID to find which customer
     // placed that order. Returns -1 if no matching transaction is found,
     // which main() can use as a signal that the order ID is invalid.
-    int getCustomerIDByOrderID(int orderID) {
+    string getCustomerIDByOrderID(int orderID) {
         if (transactions.count(orderID)) {
             return transactions[orderID]->getCustomerID();
         }
-        return -1;
+        return " ";
     }
     //Section 2 part 3 rainbow tribble goes here
     void loadRainbowList(const string& filename) {
         ifstream inFile(filename);
         if (!inFile.is_open()) return; // no file yet, the queue remains empty
-        int id;
+        string id;
         while (inFile >> id) {
             rainbowQueue.push_back(id);
         }
@@ -147,7 +146,7 @@ public:
             cout << "Warning: Could not write to " << filename << "\n";
             return;
         }
-        for (int id : rainbowQueue) {
+        for (string id : rainbowQueue) {
             outFile << id << "\n";
         }
         outFile.close();
@@ -155,8 +154,8 @@ public:
 
     // Adds a customer ID to the end of the queue, with duplicate check
     // Returns false if the customer is already on the list
-    bool addToRainbowList(int customerID) {
-        for (int id : rainbowQueue) {
+    bool addToRainbowList(string customerID) {
+        for (string id : rainbowQueue) {
             if (id == customerID) return false;
         }
         rainbowQueue.push_back(customerID);
@@ -166,8 +165,8 @@ public:
     // Returns the customer ID at the front of the queue without removing them,
     // so main() can look up and display the customer before committing to the sale
     // Returns -1 if the queue is empty
-    int peekRainbowFront() {
-        if (rainbowQueue.empty()) return -1;
+    string peekRainbowFront() {
+        if (rainbowQueue.empty()) return " ";
         return rainbowQueue.front();
     }
 
@@ -182,8 +181,8 @@ public:
 
     // Call this after all customers are loaded from file, passing in
     // the idIndex so Shop can find the current highest ID
-    void initCustomerID(const unordered_map<int, Customer*>& idIndex) {
-        int maxID = 0;
+    void initCustomerID(const unordered_map<string, Customer*>& idIndex) {
+        string maxID = 0;
         for (const auto& pair : idIndex) {
             if (pair.first > maxID) maxID = pair.first;
         }
@@ -191,8 +190,8 @@ public:
     }
 
     // Returns the next available customer ID and advances the counter
-    int getNextCustomerID() {
-        return nextCustomerID++;
+    string getNextCustomerID() {
+        return string(nextCustomerID++);
     }
 
 

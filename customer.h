@@ -21,7 +21,7 @@ using namespace std;
 
 class Customer{
 private:
-	int id;
+	string id;
 	string firstName;
 	string lastName;
 	string address_1;
@@ -32,12 +32,12 @@ private:
 	int phoneNumber;
 public:
 	Customer(){
-		id = rand();
+		id = "0";
 		postalCode = 0;
 		phoneNumber = 0;
 	}
 
-	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone, string psw, int idin = 0){
+	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone, string psw, string idin){
 		firstName = fN;
 		lastName = lN;
 		address_1 = a1;
@@ -47,7 +47,7 @@ public:
 		phoneNumber = phone;
 		pswencoded = psw;
 
-		if(idin == 0){
+		if(idin == ""){
 			id = rand();
 		} else{
 			id = idin;
@@ -60,7 +60,7 @@ public:
 	string getLastName() const{
 		return lastName;
 	}
-	int getID() const{
+	string getID() const{
 		return id;
 	}
 	string getFullAddress() const{
@@ -137,7 +137,7 @@ public:
 	    for (const Customer& customer : customers) {
 	    	// pad ID with 0's
 	    	ostringstream ss;
-	    	ss << setw(5) << setfill('0') << customer.getID();
+	    	ss << customer.getID();
 
 	        file << ss.str() << ";" << customer.getEncodedPassword() << ";" << customer.getFirstName() << ";" << customer.getLastName()
 		         << ";" << customer.getAddress1() << ";" << customer.getAddress2() << ";" << customer.getAddress3() << ";" << customer.getPostalCode() << endl;
