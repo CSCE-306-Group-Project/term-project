@@ -93,7 +93,6 @@ public:
        }
 
         // Advance the counter so the next order gets a unique ID by adding one
-        nextOrderID = to_string(stoi(nextOrderID) + 1);
 
         return newOrder;
     }
@@ -185,7 +184,8 @@ public:
     void initCustomerID(const unordered_map<string, Customer*>& idIndex) {
         string maxID = "0";
         for (const auto& pair : idIndex) {
-            if (pair.first > maxID) maxID = pair.first;
+        	if (stoi(pair.first) > stoi(maxID)) maxID = pair.first;
+
         }
         nextCustomerID = to_string(stoi(maxID) + 1);
     }
