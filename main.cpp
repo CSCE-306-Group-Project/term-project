@@ -90,6 +90,7 @@ int main() {
 
 	string customerdata;
 	shop.loadRainbowList("rainbowList.txt");
+	shop.loadTransactionList("orders.txt", "transactions.txt");
 	// loop through each line in the input file
 	while (getline(inputFile, customerdata)) {
 
@@ -319,8 +320,6 @@ int main() {
 
 			userInputMainMenu = 0;
 			cin >> userInputMainMenu;
-			//this next line helps solve an issue with menu directory. Apparently it is called an input buffer problem
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
 			if (userInputMainMenu == 1){
 				requirePasswordReset = true;
@@ -333,10 +332,7 @@ int main() {
 					cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
 				}
 
-				// TODO
-				// After fixing getOrdersByCustomerID, test the line below to see if it is still buggy or not
-				//waitForAction = true;
-
+				waitForAction = true;
 
 			} else if(userInputMainMenu == 3){
 				//This one leads to the tribble buying menu

@@ -130,6 +130,62 @@ public:
         }
         return -1;
     }
+
+    void loadTransactionList(const string& ordersFilename, const string& transactionsFilename){
+    	ifstream ordersFile(ordersFilename);
+    	if (!ordersFile.is_open()) return;
+
+    	ifstream transactionsFile(transactionsFilename);
+    	if (!transactionsFile.is_open()) return;
+
+    	string line;
+
+    	// build up the transactions vector, start with the orders file
+		while (getline(ordersFile, line)) {
+			if (line.empty()) continue; // address empty lines
+
+			stringstream ss(line);
+			string orderIDStr, dateStr, quantityStr, priceStr;
+
+			getline(ss, orderIDStr, ';');
+			getline(ss, dateStr, ';');
+			getline(ss, quantityStr, ';');
+			getline(ss, priceStr, ';');
+
+			int orderID = stol(orderIDStr);
+			int quantity = stoi(quantityStr);
+			double price = stod(priceStr);
+
+			Order* order = new Order(orderID, quantity, price);
+			orders[orderID] = order;
+		}
+
+		// get the transactions
+		while (getline(transactionsFile, line)) {
+			if (line.empty()) continue; // skip empty lines
+
+			stringstream ss(line);
+			string customerIDStr, staffIDStr, orderIDStr;
+
+			getline(ss, customerIDStr, ';');
+			getline(ss, staffIDStr, ';');
+			getline(ss, orderIDStr, ';');
+
+			int customerID = stoi(customerIDStr);
+			int orderID = stol(orderIDStr);
+
+			// add to transactions vector if the order was found for the transaction
+			if (orders.find(orderID) != orders.end()) {
+				Transaction* transaction = new Transaction(customerID, orderID);
+				transactions[orderID] = transaction;
+			}
+		}
+
+    	ordersFile.close();
+    	transactionsFile.close();
+    }
+
+
     //Section 2 part 3 rainbow tribble goes here
     void loadRainbowList(const string& filename) {
         ifstream inFile(filename);
