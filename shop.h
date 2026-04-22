@@ -170,7 +170,7 @@ public:
     // so main() can look up and display the customer before committing to the sale
     // Returns -1 if the queue is empty
     string peekRainbowFront() {
-        if (rainbowQueue.empty()) return " ";
+        if (rainbowQueue.empty()) return "X";
         return rainbowQueue.front();
     }
 

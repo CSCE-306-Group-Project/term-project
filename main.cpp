@@ -576,7 +576,7 @@ int main() {
 				} else if (rbChoice == 2) {
 					string cid = shop.peekRainbowFront();
 
-					if (cid.empty()) {
+					if (cid == "X") {
 						cout << "The waiting list is empty.\n";
 					} else {
 						Customer* c = idIndex[cid];
