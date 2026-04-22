@@ -48,7 +48,7 @@ public:
 		pswencoded = psw;
 
 		if(idin == 0){
-			id = rand();
+			id = to_string(rand());
 		} else{
 			id = idin;
 		}
