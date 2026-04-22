@@ -11,8 +11,8 @@
 
 class Transaction {
 private:
-    string customerID;
-    string orderID;
+    std::string customerID;
+    std::string orderID;
 
 public:
     // constructor

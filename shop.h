@@ -8,7 +8,8 @@
 #ifndef SHOP_H_
 #define SHOP_H_
 
-
+#include <sstream>
+#include <iomanip>
 #include <unordered_map>
 #include <vector>
 #include <fstream>
@@ -18,6 +19,7 @@
 #include "transaction.h"
 #include <string>
 #include <deque>
+#include "customer.h"
 using namespace std;
 
 class Shop {
@@ -69,9 +71,12 @@ public:
         Transaction* newTransaction = new Transaction(customerID, orderID);
         transactions[orderID] = newTransaction;
         // This is where we write and don't read to a file. This will keep track of orders
+        string salesPersonID = "000000";
         ofstream outFile("transactions.txt", std::ios::app);
         if (outFile.is_open()) {
-            outFile << customerID << ";" << newOrder->getOrderID() << endl;
+            outFile << customerID << ";"
+                    << salesPersonID << ";"
+                    << newOrder->getOrderID() << endl;
             outFile.close();
         } else {
             cout << "Warning: Could not write to transactions.txt\n";
@@ -181,26 +186,33 @@ public:
     // Call this after all customers are loaded from file, passing in
     // the idIndex so Shop can find the current highest ID
     void initCustomerID(const unordered_map<string, Customer*>& idIndex) {
-        string maxID = "0";
+        int maxID = 0;
+
         for (const auto& pair : idIndex) {
-        	if (pair.first > maxID) maxID = pair.first;
-
+            int id = stoi(pair.first);
+            if (id > maxID) maxID = id;
         }
-        int next = stoi(maxID) + 1;
 
-        ostringstream ss;
-        ss << setw(maxID.length()) << setfill('0') << next;
+        int next = maxID + 1;
+
+        stringstream ss;
+        ss << setw(6) << setfill('0') << next;
 
         nextCustomerID = ss.str();
     }
 
     // Returns the next available customer ID and advances the counter
     string getNextCustomerID() {
-        string current = nextCustomerID;
-        nextCustomerID = to_string(stoi(nextCustomerID) + 1);
-        return current;
+        int id = stoi(nextCustomerID);
 
-    };
+        stringstream ss;
+        ss << setw(6) << setfill('0') << id;
+        string formatted = ss.str();
+
+        nextCustomerID = to_string(id + 1);
+
+        return formatted;
+    }
 
 };
 

@@ -132,7 +132,7 @@ int main() {
 
 	// Read salesStaff.txt — build staff vector and ID lookup map
 	vector<salesTeam*> staff;
-	unordered_map<int, salesTeam*> staffByID;
+	unordered_map<string, salesTeam*> staffByID;
 
 	ifstream staffFile("salesStaff.txt");
 	string staffLine;
@@ -144,11 +144,12 @@ int main() {
 	    getline(ss2, spIDstr, ';');
 	    getline(ss2, bossIDstr, ';');
 
-	    int spID   = stoi(spIDstr);
-	    int bossID = stoi(bossIDstr);
+	    string spID   = spIDstr;
+	    string bossID = bossIDstr;
 
 	    salesTeam* p = nullptr;
-	    if      (title == "Sales")       p = new salesPerson(sName, spID, bossID);
+
+	    if (title == "Sales")       p = new salesPerson(sName, spID, bossID);
 	    else if (title == "SuperSales")  p = new superSalesPerson(sName, spID, bossID);
 	    else if (title == "Supervisor")  p = new supervisor(sName, spID, bossID);
 	    else if (title == "Manager")     p = new manager(sName, spID);
@@ -161,7 +162,7 @@ int main() {
 	staffFile.close();
 
 	// Read orders.txt — build orderID -> price lookup
-	unordered_map<int, double> orderPrices;
+	unordered_map<string, double> orderPrices;
 	ifstream ordersFile("orders.txt");
 	string ordLine;
 	while (getline(ordersFile, ordLine)) {
@@ -171,7 +172,7 @@ int main() {
 	    getline(ss3, date,     ';');
 	    getline(ss3, qtyStr,   ';');
 	    getline(ss3, priceStr, ';');
-	    orderPrices[stoi(idStr)] = stod(priceStr);
+	    orderPrices[idStr] = stod(priceStr);
 	}
 	ordersFile.close();
 
@@ -180,10 +181,18 @@ int main() {
 	string transLine;
 	while (getline(transFile, transLine)) {
 	    stringstream ss4(transLine);
-	    string custIDstr, orderIDstr;
+	    string custIDstr, salesIDstr, orderIDstr;
 
 	    getline(ss4, custIDstr,  ';');
+	    getline(ss4, salesIDstr, ';');
 	    getline(ss4, orderIDstr, ';');
+	    string spID = salesIDstr;
+	    string orderID = orderIDstr;
+
+	    if (orderPrices.count(orderID) && staffByID.count(spID)) {
+	        double price = orderPrices[orderID];
+	        staffByID[spID]->addSale(price);
+	    }
 
 	}
 	transFile.close();
@@ -597,12 +606,12 @@ int main() {
 				for (salesTeam* p : staff) {
 					// Sum up all sales from everyone below this person in the hierarchy
 					double subSales = 0.0;
-					int myID = p->getSalesPersonID();
+					string myID = p->getSalesPersonID();
 					for (salesTeam* other : staff) {
 						if (other->getBossID() == myID) {
 							subSales += other->getGrossSales();
 
-							int subID = other->getSalesPersonID();
+							string subID = other->getSalesPersonID();
 							for (salesTeam* sub2 : staff) {
 								if (sub2->getBossID() == subID) {
 									subSales += sub2->getGrossSales();
