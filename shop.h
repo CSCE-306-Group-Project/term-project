@@ -16,7 +16,9 @@
 #include <ctime>
 #include "order.h"
 #include "transaction.h"
-
+#include <sstream>
+#include <iomanip>
+#include "customer.h"
 using namespace std;
 
 class Shop {
@@ -68,10 +70,13 @@ public:
         transactions[orderID] = newTransaction;
 
         // This is where we write and don't read to a file. This will keep track of orders
+		string salesPersonID = "000000";
         ofstream outFile("transactions.txt", std::ios::app);
         if (outFile.is_open()) {
         	// 000000 is salesStaff ID
-            outFile << customerID << ";000000;" << newOrder->getOrderID() << endl;
+            outFile << customerID << ";"
+                    << salesPersonID << ";"
+                    << newOrder->getOrderID() << endl;
             outFile.close();
         } else {
             cout << "Warning: Could not write to transactions.txt\n";
@@ -239,16 +244,24 @@ public:
     // Call this after all customers are loaded from file, passing in
     // the idIndex so Shop can find the current highest ID
     void initCustomerID(const unordered_map<int, Customer*>& idIndex) {
-        int maxID = 0;
+       int maxID = 0;
+
         for (const auto& pair : idIndex) {
-            if (pair.first > maxID) maxID = pair.first;
+            int id = stoi(pair.first);
+            if (id > maxID) maxID = id;
         }
-        nextCustomerID = maxID + 1;
-    }
 
     // Returns the next available customer ID and advances the counter
     int getNextCustomerID() {
         return nextCustomerID++;
+    }
+	stringstream ss;
+        ss << setw(6) << setfill('0') << id;
+        string formatted = ss.str();
+
+        nextCustomerID = to_string(id + 1);
+
+        return formatted;
     }
 
 
