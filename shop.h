@@ -23,10 +23,10 @@ using namespace std;
 class Shop {
 private:
     // Orders keyed by order ID so we can look up any individual order
-    unordered_map<int, Order*> orders;
+    unordered_map<string, Order*> orders;
 
     // Transactions keyed by order ID
-    unordered_map<int, Transaction*> transactions;
+    unordered_map<string, Transaction*> transactions;
 
     deque<string> rainbowQueue;
     // we want each order to retrieve a unique ID, so basing it off real stores, we decided
@@ -60,14 +60,14 @@ public:
         double total = prices[quantity];
 
         time_t ts = time(nullptr);
-        long orderID = ts % 1000000;
+        string orderID = to_string(ts % 1000000);
 
         Order* newOrder = new Order(orderID, quantity, total);
+
         orders[orderID] = newOrder;
 
         Transaction* newTransaction = new Transaction(customerID, orderID);
         transactions[orderID] = newTransaction;
-
         // This is where we write and don't read to a file. This will keep track of orders
         ofstream outFile("transactions.txt", std::ios::app);
         if (outFile.is_open()) {
@@ -113,17 +113,16 @@ public:
     }
 
     // Direct lookup into the orders map. Returns nullptr if the order ID doesn't exist.
-    Order* getOrderByID(int orderID) {
+    Order* getOrderByID(string orderID) {
         if (orders.count(orderID)) {
             return orders[orderID];
         }
         return nullptr;
     }
-
     // Looks up the transaction keyed on order ID to find which customer
     // placed that order. Returns -1 if no matching transaction is found,
     // which main() can use as a signal that the order ID is invalid.
-    string getCustomerIDByOrderID(int orderID) {
+    string getCustomerIDByOrderID(string orderID) {
         if (transactions.count(orderID)) {
             return transactions[orderID]->getCustomerID();
         }
@@ -184,10 +183,15 @@ public:
     void initCustomerID(const unordered_map<string, Customer*>& idIndex) {
         string maxID = "0";
         for (const auto& pair : idIndex) {
-        	if (stoi(pair.first) > stoi(maxID)) maxID = pair.first;
+        	if (pair.first > maxID) maxID = pair.first;
 
         }
-        nextCustomerID = to_string(stoi(maxID) + 1);
+        int next = stoi(maxID) + 1;
+
+        ostringstream ss;
+        ss << setw(maxID.length()) << setfill('0') << next;
+
+        nextCustomerID = ss.str();
     }
 
     // Returns the next available customer ID and advances the counter

@@ -16,19 +16,19 @@ using namespace std;
 
 class Order {
 private:
-    int orderID;
+    string orderID;
     int quantity;
     double price;
 
 public:
     // For this class we will have three things, orderID to make it unique
     // quantity as the customer can buy up to five at a time, and the price that goes with it
-    Order() : orderID(0), quantity(0), price(0.0) {}
+    Order() : orderID("0"), quantity(0), price(0.0) {}
 
-    Order(int id, int qty, double p) : orderID(id), quantity(qty), price(p) {}
+    Order(string id, int qty, double p) : orderID(id), quantity(qty), price(p) {}
 
     // Getters
-    int getOrderID() const { return orderID; }
+    string getOrderID() const { return orderID; }
     int getQuantity() const { return quantity; }
     double getPrice() const { return price; }
 

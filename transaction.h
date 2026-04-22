@@ -12,18 +12,18 @@
 class Transaction {
 private:
     string customerID;
-    int orderID;
+    string orderID;
 
 public:
     // constructor
-    Transaction() : customerID(""), orderID(0) {}
+    Transaction() : customerID(""), orderID("") {}
 
     // This will allow us to tie a customer to a specific order
-    Transaction(string cID, int oID) : customerID(cID), orderID(oID) {}
+    Transaction(string cID, string oID) : customerID(cID), orderID(oID) {}
 
     // Getters
     string getCustomerID() const { return customerID; }
-    int getOrderID() const { return orderID; }
+    string getOrderID() const { return orderID; }
 };
 
 

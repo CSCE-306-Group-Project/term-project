@@ -180,18 +180,11 @@ int main() {
 	string transLine;
 	while (getline(transFile, transLine)) {
 	    stringstream ss4(transLine);
-	    string custIDstr, spIDstr, orderIDstr;
+	    string custIDstr, orderIDstr;
+
 	    getline(ss4, custIDstr,  ';');
-	    getline(ss4, spIDstr,    ';');
 	    getline(ss4, orderIDstr, ';');
 
-	    int spID    = stoi(spIDstr);
-	    int orderID = stoi(orderIDstr);
-
-	    if (spID == 0) continue; // in-store purchase, no salesperson
-	    if (staffByID.count(spID) && orderPrices.count(orderID)) {
-	        staffByID[spID]->addSale(orderPrices[orderID]);
-	    }
 	}
 	transFile.close();
 
@@ -385,6 +378,7 @@ int main() {
 				string newID = shop.getNextCustomerID();
 				Customer c(fN, lN, a1, a2, a3, postal, phone, pswencoded, newID);
 				addCustomer(c);
+				c.saveCustomers(customers);
 				cout << "\nCustomer added successfully. Their ID is: " << newID << "\n";
 
 
@@ -482,28 +476,31 @@ int main() {
 					}
 
 				} else if (customerSearchInputInt == 3) {
-					int searchOrderID;
+					string searchOrderID;
 					cout << endl << "[Lookup Customer] Enter Order #: ";
 					cin >> searchOrderID;
 
-					// Ask Shop to find the order — returns nullptr if it doesn't exist
+					// Ask Shop to find the order
 					Order* foundOrder = shop.getOrderByID(searchOrderID);
 
 					if (foundOrder == nullptr) {
-						cout << "\nNo order found with that ID.\n";
+					    cout << "\nNo order found with that ID.\n";
 					} else {
-						// Now find the customer who placed this order
-						string custID = shop.getCustomerIDByOrderID(searchOrderID);
-						Customer* c = idIndex[custID];
+					    string custID = shop.getCustomerIDByOrderID(searchOrderID);
 
-						cout << "\nOrder Found:\n";
-						cout << foundOrder->to_string() << "\n";
-						cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
-						cout << c->getFullAddress() << "\n";
-						cout << "Phone: " << c->getPhone() << "\n";
+					    if (idIndex.count(custID)) {
+					        Customer* c = idIndex[custID];
+
+					        cout << "\nOrder Found:\n";
+					        cout << foundOrder->to_string() << "\n";
+					        cout << "Placed by: " << c->getFirstName() << " " << c->getLastName() << "\n";
+					        cout << c->getFullAddress() << "\n";
+					        cout << "Phone: " << c->getPhone() << "\n";
+					    } else {
+					        cout << "Customer not found.\n";
+					    }
 					}
 				}
-
 			} else if (userInputMainMenu == 3) {
 				//This one leads to the tribble buying menu
 				string custID;
@@ -635,9 +632,6 @@ int main() {
 	cout << endl << "Goodbye";
 	shop.saveRainbowList("rainbowList.txt");
 
-	if (customerObj != nullptr) {
-	    customerObj->saveCustomers(customers);
-	}
 
 	return 0;
 
