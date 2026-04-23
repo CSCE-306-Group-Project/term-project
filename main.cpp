@@ -298,7 +298,7 @@ int main() {
 			cout << "Welcome " << customerObj->getFirstName() << "!\nFor your security, please set a new password:\n";
 			cin >> pswSetIn;
 
-			//Checking if user is following the password criteria
+			//Checking if user is following the password criteria hello
 			if (!validatePassword(pswSetIn)) {
 			    cout << "Invalid password. Must be at least 4 alphanumeric characters. Try again.\n";
 			} else if (encodePassword(pswSetIn) == customerObj->getEncodedPassword()) {
