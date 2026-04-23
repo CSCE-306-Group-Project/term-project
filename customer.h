@@ -29,15 +29,15 @@ private:
 	string address_3;
 	string pswencoded;
 	int postalCode;
-	int phoneNumber;
+	string phoneNumber;
 public:
 	Customer(){
 		id = rand();
 		postalCode = 0;
-		phoneNumber = 0;
+		phoneNumber = "";
 	}
 
-	Customer(string fN, string lN, string a1, string a2, string a3, int postal, int phone, string psw, int idin = 0){
+	Customer(string fN, string lN, string a1, string a2, string a3, int postal, string phone, string psw, int idin = 0){
 		firstName = fN;
 		lastName = lN;
 		address_1 = a1;
@@ -81,7 +81,7 @@ public:
 	int getPostalCode() const{
 		return postalCode;
 	}
-	int getPhone() const{
+	string getPhone() const{
 		return phoneNumber;
 	}
 
@@ -109,7 +109,7 @@ public:
 	void setPostalCode(int postal){
 		postalCode = postal;
 	}
-	void setPhoneNumber(int phone){
+	void setPhoneNumber(string phone){
 		phoneNumber = phone;
 	}
 	void setPassword(string pswin){

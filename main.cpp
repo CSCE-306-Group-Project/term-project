@@ -140,7 +140,7 @@ int main() {
 			inputSectionNumber++;
 		}
 
-		Customer c(fname, lname, a1, a2, a3, postal, 0, pswencode, id);
+		Customer c(fname, lname, a1, a2, a3, postal, "", pswencode, id);
 		addCustomer(c);
 	}
 
@@ -234,8 +234,12 @@ int main() {
 
 		// Prevent menu from immediately displaying after large outputs
 		if(waitForAction){
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			cout << "Press [ENTER] to return to the menu";
+			cin.clear();
+			if (cin.rdbuf()->in_avail() > 0) {
+				cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			}
+
 			cin.get();
 			waitForAction = false;
 		}
@@ -394,7 +398,7 @@ int main() {
 				string pswin;
 				string pswencoded;
 				int postal;
-				int phone;
+				string phone;
 
 				cout << endl << "[Add Customer] (1/8) Customer First Name:" << endl;
 				getline(cin, fN);
@@ -454,63 +458,63 @@ int main() {
 
 						if(results.size() == 1){
 
-						//if we only have one then just show it
-						Customer* c = results[0];
+							//if we only have one then just show it
+							Customer* c = results[0];
 
-						cout << "\nFound Customer:\n";
-						cout << c->getFirstName() << " "
-							 << c->getLastName() << endl;
-						cout << c->getFullAddress() << endl;
-						cout << "Phone: " << c->getPhone() << endl;
-						cout << "Customer ID: " << c->getID() << "\nOrders:\n";
-						for (auto order: shop.getOrdersByCustomerID(c->getID())){
-							cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
-						}
-
-						waitForAction = true;
-
-					} else {
-
-						// when we have multiple last name we can let user to select
-						cout << "\nMultiple customers found:\n";
-
-						for (size_t i = 0; i < results.size(); ++i) {
-							cout << "(" << i + 1 << ") "
-								 << results[i]->getFirstName() << " "
-								 << results[i]->getLastName()
-								 << " (ID: " << results[i]->getID() << ")"
-								 << endl;
-						}
-
-						cout << "\nSelect a customer by number: ";
-						int choice;
-						cin >> choice;
-
-						if (choice > 0 && static_cast<size_t>(choice) <= results.size()) {
-
-							Customer* selected = results[static_cast<size_t>(choice) - 1];
-
-							cout << "\nSelected Customer:\n";
-							cout << selected->getFirstName() << " "
-								 << selected->getLastName() << endl;
-							cout << selected->getFullAddress() << endl;
-							cout << "Phone: " << selected->getPhone() << endl;
-							cout << "Customer ID: " << selected->getID() << "\nOrders:\n";
-
-							for (auto order: shop.getOrdersByCustomerID(selected->getID())){
+							cout << "\nFound Customer:\n";
+							cout << c->getFirstName() << " "
+								 << c->getLastName() << endl;
+							cout << c->getFullAddress() << endl;
+							cout << "Phone: " << c->getPhone() << endl;
+							cout << "Customer ID: " << c->getID() << "\nOrders:\n";
+							for (auto order: shop.getOrdersByCustomerID(c->getID())){
 								cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
 							}
 
 							waitForAction = true;
 
 						} else {
-							cout << "\nInvalid selection.\n";
-						}
-					}
 
-				} else {
-					cout << "\nNo customer found.\n";
-				}
+							// when we have multiple last name we can let user to select
+							cout << "\nMultiple customers found:\n";
+
+							for (size_t i = 0; i < results.size(); ++i) {
+								cout << "(" << i + 1 << ") "
+									 << results[i]->getFirstName() << " "
+									 << results[i]->getLastName()
+									 << " (ID: " << results[i]->getID() << ")"
+									 << endl;
+							}
+
+							cout << "\nSelect a customer by number: ";
+							int choice;
+							cin >> choice;
+
+							if (choice > 0 && static_cast<size_t>(choice) <= results.size()) {
+
+								Customer* selected = results[static_cast<size_t>(choice) - 1];
+
+								cout << "\nSelected Customer:\n";
+								cout << selected->getFirstName() << " "
+									 << selected->getLastName() << endl;
+								cout << selected->getFullAddress() << endl;
+								cout << "Phone: " << selected->getPhone() << endl;
+								cout << "Customer ID: " << selected->getID() << "\nOrders:\n";
+
+								for (auto order: shop.getOrdersByCustomerID(selected->getID())){
+									cout << "(" << order->getOrderID() << ") " << order->getQuantity() << " for " << order->getPrice() << endl;
+								}
+
+								waitForAction = true;
+
+							} else {
+								cout << "\nInvalid selection.\n";
+							}
+						}
+
+					} else {
+						cout << "\nNo customer found.\n";
+					}
 
 				} else if (customerSearchInputInt == 2) {
 					int searchID;

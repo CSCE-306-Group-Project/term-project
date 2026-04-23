@@ -122,3 +122,5 @@
 17777;wuleeohv;Ralph;Devine;515 N Tonica St;Mason City;IL;62664
 07470;wuleeohv;Brett;Turner;2411 Eisenhower Ave;Valparaiso;IN;46383
 02282;wuleeohv;Scott;Ellis;7219 Cleveland Cir;Merrillville;IN;46410
+32157;khoor;john;smith;30 s brainard;naperville;il;60540
+32158;khoor;jane;smith;40 s brain;naper;il;60540
